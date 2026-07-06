@@ -5,12 +5,15 @@ Wants=postgresql.service
 
 [Service]
 Type=simple
-User=nagaforge
-Group=nagaforge
-WorkingDirectory=/opt/nagaforge-gpt/backend
+# User/Group must OWN the app directory and be able to write uploads/.
+# On Ubuntu Lightsail this is usually "ubuntu"; on Bitnami images it's "bitnami".
+# Match whoever ran `git clone` in Part 1.
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/nagaforge/globalconstructmgmt/backend
 EnvironmentFile=/etc/nagaforge.env
 # 4 Uvicorn workers behind Gunicorn. Tune workers to ~ (2 x CPU cores) + 1.
-ExecStart=/opt/nagaforge-gpt/venv/bin/gunicorn main:app \
+ExecStart=/opt/nagaforge/globalconstructmgmt/venv/bin/gunicorn main:app \
     --workers 4 \
     --worker-class uvicorn.workers.UvicornWorker \
     --bind 127.0.0.1:8000 \
@@ -23,7 +26,7 @@ RestartSec=3
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
-ReadWritePaths=/opt/nagaforge-gpt/uploads
+ReadWritePaths=/opt/nagaforge/globalconstructmgmt/uploads
 
 [Install]
 WantedBy=multi-user.target
