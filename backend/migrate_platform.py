@@ -202,9 +202,14 @@ def ensure_demo_tenant(db) -> dict:
         )
         db.add(user)
     else:
+        # The demo account is a throwaway: keep it usable every boot by
+        # re-syncing its password to DEMO_PASSWORD and (re)activating it.
         user.is_demo = True
         user.company_id = company.id
         user.is_platform_admin = False
+        user.is_active = True
+        user.role = user.role or "admin"
+        user.hashed_password = hash_password(settings.DEMO_PASSWORD)
     db.commit()
     return {"company_id": company.id, "demo_user": settings.DEMO_USERNAME}
 
