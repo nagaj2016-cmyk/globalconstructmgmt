@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 16px; }
+  h1 { text-align: center; color: #38bdf8; font-size: 18px; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 16px; }
+  
+  .tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid #334155; background: #1e293b; color: #94a3b8; transition: all 0.2s; }
+  .tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* FLOW DIAGRAM */
+  .flow-container { overflow-x: auto; }
+  svg text { font-family: -apple-system, sans-serif; }
+
+  /* MODULE GRID */
+  .module-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .module-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 12px; }
+  .module-card h3 { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .module-card ul { list-style: none; }
+  .module-card li { font-size: 11px; color: #94a3b8; padding: 2px 0; border-bottom: 1px solid #1e293b; }
+  .module-card li::before { content: "→ "; color: #3b82f6; }
+
+  /* ROLE FLOWS */
+  .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .role-card { background: #1e293b; border-radius: 10px; padding: 14px; border-top: 3px solid; }
+  .role-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .step { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .step-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 11px; color: #cbd5e1; }
+  .step-label { font-weight: 600; color: #e2e8f0; font-size: 11px; }
+
+  /* SALABILITY */
+  .sal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .sal-card { background: #1e293b; border-radius: 10px; padding: 14px; }
+  .sal-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .sal-item { display: flex; gap: 8px; margin-bottom: 8px; font-size: 12px; color: #cbd5e1; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+  .green { background: #14532d; color: #4ade80; }
+  .orange { background: #431407; color: #fb923c; }
+  .blue { background: #1e3a5f; color: #60a5fa; }
+  .red { background: #450a0a; color: #f87171; }
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .comp-table th { background: #0f172a; padding: 6px 8px; text-align: left; color: #64748b; }
+  .comp-table td { padding: 5px 8px; border-bottom: 1px solid #1e293b; }
+  .comp-table tr:hover td { background: #1e293b; }
+  .tick { color: #4ade80; } .cross { color: #f87171; } .part { color: #fb923c; }
+</style>
+</head>
+<body>
+<h1>NagaForge — End-to-End App Flow</h1>
+<div class="subtitle">15-Phase Enterprise Construction Management Platform</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('flow')">App Flow</div>
+  <div class="tab" onclick="show('roles')">Role Journeys</div>
+  <div class="tab" onclick="show('modules')">Module Map</div>
+  <div class="tab" onclick="show('salable')">Salability Analysis</div>
+</div>
+
+<!-- VIEW 1: MAIN FLOW -->
+<div class="view active" id="view-flow">
+<div class="flow-container">
+<svg viewBox="0 0 980 720" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:680px">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#475569"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#3b82f6"/>
+    </marker>
+    <marker id="arr-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="#22c55e"/>
+    </marker>
+  </defs>
+
+  <!-- TITLE ROW -->
+  <text x="490" y="22" text-anchor="middle" fill="#38bdf8" font-size="13" font-weight="700">NagaForge — System Flow</text>
+
+  <!-- LOGIN BOX -->
+  <rect x="390" y="35" width="200" height="52" rx="10" fill="#1e40af" stroke="#3b82f6" stroke-width="2"/>
+  <text x="490" y="56" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">🔐 Login</text>
+  <text x="490" y="72" text-anchor="middle" fill="#bfdbfe" font-size="10">JWT Auth · 8 Roles</text>
+  <text x="490" y="84" text-anchor="middle" fill="#bfdbfe" font-size="9">admin / pm / engineer / designer / finance / foreman / client / worker</text>
+
+  <!-- DASHBOARD -->
+  <rect x="365" y="118" width="250" height="44" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="490" y="138" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="700">📊 Dashboard</text>
+  <text x="490" y="153" text-anchor="middle" fill="#64748b" font-size="9">Live KPIs · Projects · Finance · Safety · Quality</text>
+
+  <!-- Arrow down from login to dashboard -->
+  <line x1="490" y1="87" x2="490" y2="118" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr-blue)"/>
+
+  <!-- BRANCH LINES from dashboard -->
+  <!-- Left branch -->
+  <line x1="365" y1="140" x2="180" y2="140" stroke="#475569" stroke-width="1" stroke-dasharray="4,3"/>
+  <!-- Right branch -->
+  <line x1="615" y1="140" x2="800" y2="140" stroke="#475569" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- ═══ LEFT COLUMN — Organisation & HR ═══ -->
+  <text x="95" y="185" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">ORGANISATION</text>
+  <line x1="95" y1="188" x2="95" y2="200" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="20" y="200" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="95" y="215" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">🏢 Company / Org</text>
+  <text x="95" y="228" text-anchor="middle" fill="#64748b" font-size="8.5">Branches · Depts · Staff</text>
+
+  <line x1="95" y1="236" x2="95" y2="252" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="20" y="252" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="95" y="267" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">👷 Workforce</text>
+  <text x="95" y="280" text-anchor="middle" fill="#64748b" font-size="8.5">Workers · Roles · Payroll</text>
+
+  <line x1="95" y1="288" x2="95" y2="304" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="20" y="304" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="95" y="319" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">👥 Clients & CRM</text>
+  <text x="95" y="332" text-anchor="middle" fill="#64748b" font-size="8.5">Leads · Contacts · Docs</text>
+
+  <line x1="95" y1="340" x2="95" y2="356" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="20" y="356" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="95" y="371" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">💰 Finance</text>
+  <text x="95" y="384" text-anchor="middle" fill="#64748b" font-size="8.5">Expenses · Invoices · P&amp;L</text>
+
+  <line x1="95" y1="392" x2="95" y2="408" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="20" y="408" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="95" y="423" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">📦 Inventory</text>
+  <text x="95" y="436" text-anchor="middle" fill="#64748b" font-size="8.5">Materials · Stock · Alerts</text>
+
+  <!-- Connector from left branch down -->
+  <line x1="180" y1="140" x2="180" y2="200" stroke="#475569" stroke-width="1"/>
+  <line x1="95" y1="200" x2="180" y2="200" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <!-- Actually draw direct lines from left -->
+  <line x1="170" y1="200" x2="170" y2="443" stroke="#334155" stroke-width="0.5" stroke-dasharray="2,4"/>
+
+  <!-- ═══ CENTER-LEFT — Projects & Planning ═══ -->
+  <text x="310" y="185" text-anchor="middle" fill="#34d399" font-size="10" font-weight="700">PROJECTS &amp; PLANNING</text>
+  <line x1="310" y1="140" x2="310" y2="200" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="235" y="200" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="310" y="215" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">📁 Projects</text>
+  <text x="310" y="228" text-anchor="middle" fill="#64748b" font-size="8.5">Create · Assign · Track</text>
+
+  <line x1="310" y1="236" x2="310" y2="252" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="235" y="252" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="310" y="267" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">✅ Task Board</text>
+  <text x="310" y="280" text-anchor="middle" fill="#64748b" font-size="8.5">Kanban · Assign · Status</text>
+
+  <line x1="310" y1="288" x2="310" y2="304" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="235" y="304" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="310" y="319" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">📅 Scheduling CPM</text>
+  <text x="310" y="332" text-anchor="middle" fill="#64748b" font-size="8.5">Critical Path · EVM · Gantt</text>
+
+  <line x1="310" y1="340" x2="310" y2="356" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="235" y="356" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="310" y="371" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">🤝 Commercial</text>
+  <text x="310" y="384" text-anchor="middle" fill="#64748b" font-size="8.5">BOQ · PO · Contracts</text>
+
+  <line x1="310" y1="392" x2="310" y2="408" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="235" y="408" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="310" y="423" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">📄 Documents</text>
+  <text x="310" y="436" text-anchor="middle" fill="#64748b" font-size="8.5">Upload · Revisions · DMS</text>
+
+  <!-- ═══ CENTER-RIGHT — Site Execution ═══ -->
+  <text x="670" y="185" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="700">SITE EXECUTION</text>
+  <line x1="670" y1="140" x2="670" y2="200" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="595" y="200" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="670" y="215" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="600">🏗️ Site Operations</text>
+  <text x="670" y="228" text-anchor="middle" fill="#64748b" font-size="8.5">Diary · Equipment · Attendance</text>
+
+  <line x1="670" y1="236" x2="670" y2="252" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="595" y="252" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="670" y="267" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="600">🛡️ Safety &amp; HSE</text>
+  <text x="670" y="280" text-anchor="middle" fill="#64748b" font-size="8.5">Incidents · PTW · Risk Matrix</text>
+
+  <line x1="670" y1="288" x2="670" y2="304" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="595" y="304" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="670" y="319" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="600">🔬 Quality Control</text>
+  <text x="670" y="332" text-anchor="middle" fill="#64748b" font-size="8.5">IS 516 Cube · NCR · Punch List</text>
+
+  <line x1="670" y1="340" x2="670" y2="356" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="595" y="356" width="150" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="670" y="371" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="600">🧱 BIM Viewer</text>
+  <text x="670" y="384" text-anchor="middle" fill="#64748b" font-size="8.5">3D Model · Clash · Takeoff</text>
+
+  <!-- ═══ RIGHT COLUMN — Engineering ═══ -->
+  <text x="880" y="185" text-anchor="middle" fill="#818cf8" font-size="10" font-weight="700">ENGINEERING SUITE</text>
+  <line x1="800" y1="140" x2="800" y2="200" stroke="#475569" stroke-width="1"/>
+  <line x1="800" y1="200" x2="880" y2="200" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+
+  <rect x="805" y="200" width="155" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="882" y="215" text-anchor="middle" fill="#818cf8" font-size="10" font-weight="600">🏛️ IS Structural</text>
+  <text x="882" y="228" text-anchor="middle" fill="#64748b" font-size="8.5">Loads · Beam · Col · Slab · Found</text>
+
+  <line x1="882" y1="236" x2="882" y2="252" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="805" y="252" width="155" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="882" y="267" text-anchor="middle" fill="#818cf8" font-size="10" font-weight="600">🌍 Intl. Codes</text>
+  <text x="882" y="280" text-anchor="middle" fill="#64748b" font-size="8.5">NBCC · ASCE · Eurocode</text>
+
+  <line x1="882" y1="288" x2="882" y2="304" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="805" y="304" width="155" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="882" y="319" text-anchor="middle" fill="#818cf8" font-size="10" font-weight="600">⚙️ Steel Design</text>
+  <text x="882" y="332" text-anchor="middle" fill="#64748b" font-size="8.5">IS 800 · AISC · Connections</text>
+
+  <line x1="882" y1="340" x2="882" y2="356" stroke="#475569" stroke-width="1" marker-end="url(#arr)"/>
+  <rect x="805" y="356" width="155" height="36" rx="6" fill="#1e293b" stroke="#334155"/>
+  <text x="882" y="371" text-anchor="middle" fill="#818cf8" font-size="10" font-weight="600">🧮 Mix Design / BBS</text>
+  <text x="882" y="384" text-anchor="middle" fill="#64748b" font-size="8.5">IS 10262 · Bar Bending Sched.</text>
+
+  <!-- ═══ BOTTOM ROW — Platform ═══ -->
+  <rect x="20" y="490" width="930" height="2" fill="#1e293b"/>
+  <text x="490" y="510" text-anchor="middle" fill="#64748b" font-size="10" font-weight="700">PLATFORM LAYER</text>
+
+  <rect x="20" y="522" width="140" height="44" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text x="90" y="540" text-anchor="middle" fill="#e879f9" font-size="10" font-weight="600">🌐 SaaS Admin</text>
+  <text x="90" y="553" text-anchor="middle" fill="#64748b" font-size="8.5">Plans · Tenants · MRR</text>
+
+  <rect x="175" y="522" width="140" height="44" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text x="245" y="540" text-anchor="middle" fill="#e879f9" font-size="10" font-weight="600">🎨 White-label</text>
+  <text x="245" y="553" text-anchor="middle" fill="#64748b" font-size="8.5">Colors · Logo · Domain</text>
+
+  <rect x="330" y="522" width="140" height="44" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text x="400" y="540" text-anchor="middle" fill="#e879f9" font-size="10" font-weight="600">👤 Role-Based Access</text>
+  <text x="400" y="553" text-anchor="middle" fill="#64748b" font-size="8.5">8 roles · JWT · Secure</text>
+
+  <rect x="485" y="522" width="140" height="44" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text x="555" y="540" text-anchor="middle" fill="#e879f9" font-size="10" font-weight="600">🗄️ PostgreSQL / SQLite</text>
+  <text x="555" y="553" text-anchor="middle" fill="#64748b" font-size="8.5">Dev → Prod migration</text>
+
+  <rect x="640" y="522" width="140" height="44" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text x="710" y="540" text-anchor="middle" fill="#e879f9" font-size="10" font-weight="600">🚀 Deploy</text>
+  <text x="710" y="553" text-anchor="middle" fill="#64748b" font-size="8.5">ngrok · Railway · Docker</text>
+
+  <rect x="795" y="522" width="155" height="44" rx="8" fill="#1e293b" stroke="#334155"/>
+  <text x="872" y="540" text-anchor="middle" fill="#e879f9" font-size="10" font-weight="600">📡 REST API</text>
+  <text x="872" y="553" text-anchor="middle" fill="#64748b" font-size="8.5">FastAPI · OpenAPI · CORS</text>
+
+  <!-- Pending badge -->
+  <rect x="20" y="590" width="930" height="30" rx="6" fill="#1a1a2e" stroke="#312e81"/>
+  <text x="490" y="610" text-anchor="middle" fill="#6366f1" font-size="10">⏳ PENDING — Phase 11: AI/ML  ·  Phase 12: IoT  ·  Phase 14: Mobile PWA  ·  Phase 15: Marketplace &amp; Academy</text>
+
+  <!-- Legend -->
+  <rect x="20" y="635" width="930" height="28" rx="6" fill="#0f172a"/>
+  <text x="90" y="652" text-anchor="middle" fill="#fbbf24" font-size="9" font-weight="700">ORG/FINANCE</text>
+  <text x="250" y="652" text-anchor="middle" fill="#34d399" font-size="9" font-weight="700">PROJECTS/PLANNING</text>
+  <text x="430" y="652" text-anchor="middle" fill="#f472b6" font-size="9" font-weight="700">SITE EXECUTION</text>
+  <text x="600" y="652" text-anchor="middle" fill="#818cf8" font-size="9" font-weight="700">ENGINEERING (UNIQUE)</text>
+  <text x="760" y="652" text-anchor="middle" fill="#e879f9" font-size="9" font-weight="700">PLATFORM/SAAS</text>
+</svg>
+</div>
+</div>
+
+<!-- VIEW 2: ROLE JOURNEYS -->
+<div class="view" id="view-roles">
+<div class="role-grid">
+
+  <div class="role-card" style="border-color:#ef4444">
+    <h3 style="color:#ef4444">👑 Admin</h3>
+    <div class="step"><div class="step-num" style="background:#ef4444">1</div><div class="step-text"><span class="step-label">Company Setup</span><br>Create company, branches, departments, add consultants & contractors</div></div>
+    <div class="step"><div class="step-num" style="background:#ef4444">2</div><div class="step-text"><span class="step-label">User Management</span><br>Create user accounts, assign roles, set permissions</div></div>
+    <div class="step"><div class="step-num" style="background:#ef4444">3</div><div class="step-text"><span class="step-label">SaaS Admin</span><br>Manage tenants, view MRR, assign plans, white-label config</div></div>
+    <div class="step"><div class="step-num" style="background:#ef4444">4</div><div class="step-text"><span class="step-label">Dashboard</span><br>Monitor all KPIs across projects, finance, safety, quality</div></div>
+  </div>
+
+  <div class="role-card" style="border-color:#3b82f6">
+    <h3 style="color:#3b82f6">📋 Project Manager</h3>
+    <div class="step"><div class="step-num" style="background:#3b82f6">1</div><div class="step-text"><span class="step-label">Create Project</span><br>Set scope, budget, timeline, assign team</div></div>
+    <div class="step"><div class="step-num" style="background:#3b82f6">2</div><div class="step-text"><span class="step-label">Commercial Setup</span><br>Create BOQ, rate analysis, vendor POs, contracts</div></div>
+    <div class="step"><div class="step-num" style="background:#3b82f6">3</div><div class="step-text"><span class="step-label">Schedule</span><br>Build CPM network, set milestones, track EVM (SPI/CPI)</div></div>
+    <div class="step"><div class="step-num" style="background:#3b82f6">4</div><div class="step-text"><span class="step-label">Monitor</span><br>Task board, daily progress, cost vs budget, risks</div></div>
+    <div class="step"><div class="step-num" style="background:#3b82f6">5</div><div class="step-text"><span class="step-label">Report</span><br>Finance invoices, client updates, document management</div></div>
+  </div>
+
+  <div class="role-card" style="border-color:#8b5cf6">
+    <h3 style="color:#8b5cf6">🏗️ Site Engineer</h3>
+    <div class="step"><div class="step-num" style="background:#8b5cf6">1</div><div class="step-text"><span class="step-label">Daily Diary</span><br>Log site activities, weather, visitors, progress notes</div></div>
+    <div class="step"><div class="step-num" style="background:#8b5cf6">2</div><div class="step-text"><span class="step-label">Attendance</span><br>Mark worker attendance with GPS location</div></div>
+    <div class="step"><div class="step-num" style="background:#8b5cf6">3</div><div class="step-text"><span class="step-label">Material Consumption</span><br>Log materials used, track against BOQ</div></div>
+    <div class="step"><div class="step-num" style="background:#8b5cf6">4</div><div class="step-text"><span class="step-label">QC Tests</span><br>Enter cube test results, auto IS 516 pass/fail check</div></div>
+    <div class="step"><div class="step-num" style="background:#8b5cf6">5</div><div class="step-text"><span class="step-label">Raise NCR</span><br>Non-conformance report, punch list, close-out</div></div>
+  </div>
+
+  <div class="role-card" style="border-color:#10b981">
+    <h3 style="color:#10b981">✏️ Designer / Structural Engineer</h3>
+    <div class="step"><div class="step-num" style="background:#10b981">1</div><div class="step-text"><span class="step-label">IS Structural Calcs</span><br>Beam/column/slab/foundation design per IS 456, IS 875</div></div>
+    <div class="step"><div class="step-num" style="background:#10b981">2</div><div class="step-text"><span class="step-label">Steel Design</span><br>IS 800 beam/column/connections, auto section selector</div></div>
+    <div class="step"><div class="step-num" style="background:#10b981">3</div><div class="step-text"><span class="step-label">International Codes</span><br>NBCC / ASCE 7-22 / Eurocode wind, seismic, snow</div></div>
+    <div class="step"><div class="step-num" style="background:#10b981">4</div><div class="step-text"><span class="step-label">BIM Model</span><br>Create building model, add elements, run clash detection</div></div>
+    <div class="step"><div class="step-num" style="background:#10b981">5</div><div class="step-text"><span class="step-label">Mix Design / BBS</span><br>IS 10262 concrete mix, bar bending schedule, BOQ</div></div>
+  </div>
+
+  <div class="role-card" style="border-color:#f59e0b">
+    <h3 style="color:#f59e0b">🦺 Safety Officer / Foreman</h3>
+    <div class="step"><div class="step-num" style="background:#f59e0b">1</div><div class="step-text"><span class="step-label">Toolbox Talk</span><br>Record daily safety briefing, topic, attendees</div></div>
+    <div class="step"><div class="step-num" style="background:#f59e0b">2</div><div class="step-text"><span class="step-label">Permit to Work</span><br>Issue hot-work / height / confined space / electrical PTW</div></div>
+    <div class="step"><div class="step-num" style="background:#f59e0b">3</div><div class="step-text"><span class="step-label">Risk Assessment</span><br>5×5 risk matrix, HIRA, control measures</div></div>
+    <div class="step"><div class="step-num" style="background:#f59e0b">4</div><div class="step-text"><span class="step-label">Incident Report</span><br>Log incident, auto INC-XXXX, LTIFR calculation</div></div>
+    <div class="step"><div class="step-num" style="background:#f59e0b">5</div><div class="step-text"><span class="step-label">Safety Inspection</span><br>Checklist-based inspection, findings, close-out</div></div>
+  </div>
+
+  <div class="role-card" style="border-color:#64748b">
+    <h3 style="color:#94a3b8">💼 Finance / Client</h3>
+    <div class="step"><div class="step-num" style="background:#64748b">1</div><div class="step-text"><span class="step-label">Finance (Internal)</span><br>Log expenses, raise invoices, track P&amp;L by project</div></div>
+    <div class="step"><div class="step-num" style="background:#64748b">2</div><div class="step-text"><span class="step-label">Budget vs Actual</span><br>Compare budget to spend, EVM CPI/SPI alerts</div></div>
+    <div class="step"><div class="step-num" style="background:#64748b">3</div><div class="step-text"><span class="step-label">Client Portal</span><br>View assigned projects, approve deliverables, invoices</div></div>
+    <div class="step"><div class="step-num" style="background:#64748b">4</div><div class="step-text"><span class="step-label">Commercial</span><br>Review BOQ, purchase orders, contract terms</div></div>
+  </div>
+</div>
+</div>
+
+<!-- VIEW 3: MODULE MAP -->
+<div class="view" id="view-modules">
+<div class="module-grid">
+  <div class="module-card"><h3 style="color:#fbbf24">🏢 Organisation</h3><ul>
+    <li>Company profile & branding</li><li>Branches (multi-location)</li><li>Departments</li>
+    <li>Contractors & consultants</li><li>User accounts & roles</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#34d399">📁 Projects</h3><ul>
+    <li>Project CRUD (5 statuses)</li><li>Task board (Kanban)</li><li>Milestone tracking</li>
+    <li>Team assignment</li><li>Project documents</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#34d399">📅 Scheduling</h3><ul>
+    <li>CPM / PERT (forward/backward pass)</li><li>Critical path auto-detect</li>
+    <li>Total float &amp; free float</li><li>EVM: PV, EV, AC, SV, CV</li>
+    <li>SPI, CPI, EAC, ETC, VAC, TCPI</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#34d399">🤝 Commercial</h3><ul>
+    <li>BOQ (qty × rate auto-calc)</li><li>Rate analysis (labour+material+plant)</li>
+    <li>Vendor management</li><li>Purchase orders (GST 18%)</li>
+    <li>Contracts &amp; budget tracking</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#f472b6">🏗️ Site Ops</h3><ul>
+    <li>Daily site diary</li><li>Equipment &amp; fuel log</li>
+    <li>Worker attendance (GPS)</li><li>Material consumption</li>
+    <li>Site photos (upload)</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#f472b6">🔬 Quality Control</h3><ul>
+    <li>Cube tests (IS 516 auto pass/fail)</li><li>QC inspections (checklists)</li>
+    <li>NCR (auto INC-XXXX)</li><li>Punch list</li>
+    <li>QA dashboard &amp; trends</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#f472b6">🛡️ Safety</h3><ul>
+    <li>Incidents (LTIFR calc)</li><li>Toolbox talks (18 topics)</li>
+    <li>Permits to Work (6 types)</li><li>Risk assessments (5×5 matrix)</li>
+    <li>Safety inspections</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#f472b6">🧱 BIM</h3><ul>
+    <li>Building model CRUD</li><li>20+ element types</li>
+    <li>Isometric 3D canvas viewer</li><li>AABB clash detection</li>
+    <li>Quantity takeoff by floor/type</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#818cf8">🏛️ IS Structural</h3><ul>
+    <li>IS 875 dead/live/wind/seismic loads</li><li>IS 456 beam/column/slab design</li>
+    <li>IS 1893 seismic (Sa/g)</li><li>IS 16700 tall building</li>
+    <li>Foundation (IS 6403)</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#818cf8">🌍 Intl. Codes</h3><ul>
+    <li>NBCC 2020 (Canada)</li><li>ASCE 7-22 + ACI 318-19 (USA)</li>
+    <li>EN 1991/1992/1998 (Eurocode)</li><li>Load combinations</li>
+    <li>Code comparison tool</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#818cf8">⚙️ Steel Design</h3><ul>
+    <li>IS 800:2007 beam (LTB via Mcr)</li><li>IS 800 column (curves a/b/c/d)</li>
+    <li>IS 800 bolt &amp; fillet weld (Cl.10)</li><li>AISC 360-22 LRFD beam/column</li>
+    <li>Auto section selector (ISMB)</li>
+  </ul></div>
+  <div class="module-card"><h3 style="color:#e879f9">🌐 SaaS Platform</h3><ul>
+    <li>Free / Starter / Pro / Enterprise plans</li><li>One-click tenant onboarding</li>
+    <li>White-label (colors, logo, domain)</li><li>MRR / ARR dashboard</li>
+    <li>Suspend / activate tenants</li>
+  </ul></div>
+</div>
+</div>
+
+<!-- VIEW 4: SALABILITY -->
+<div class="view" id="view-salable">
+<div class="sal-grid">
+  <div class="sal-card">
+    <h3>🟢 What's Genuinely Unique</h3>
+    <div class="sal-item"><span class="badge green">UNIQUE</span> Only construction ERP with IS 800 + AISC + Eurocode steel design built-in</div>
+    <div class="sal-item"><span class="badge green">UNIQUE</span> Multi-standard structural codes (India + Canada + USA + Europe) in one platform</div>
+    <div class="sal-item"><span class="badge green">UNIQUE</span> Structural calcs linked to project ERP — Procore, Buildertrend, Oracle have ZERO structural calculations</div>
+    <div class="sal-item"><span class="badge green">UNIQUE</span> IS 10262 mix design + BBS generator + BOQ — all code-compliant</div>
+    <div class="sal-item"><span class="badge green">UNIQUE</span> Full open-source stack — zero license cost vs Procore ($375/user/mo)</div>
+    <div class="sal-item"><span class="badge blue">STRONG</span> Multi-tenant SaaS-ready with white-label from day 1</div>
+    <div class="sal-item"><span class="badge blue">STRONG</span> CPM/PERT + EVM professional scheduling (most ERPs only have Gantt)</div>
+  </div>
+
+  <div class="sal-card">
+    <h3>🔴 Gaps Before Commercial Launch</h3>
+    <div class="sal-item"><span class="badge orange">NEEDED</span> Mobile PWA — construction work happens on site, not at desks</div>
+    <div class="sal-item"><span class="badge orange">NEEDED</span> Email/SMS notifications — approval alerts, deadline reminders</div>
+    <div class="sal-item"><span class="badge orange">NEEDED</span> Stripe payment integration — SaaS billing is mocked, not real</div>
+    <div class="sal-item"><span class="badge orange">NEEDED</span> PDF report generation — design output, QC reports, safety reports</div>
+    <div class="sal-item"><span class="badge orange">NEEDED</span> Excel export — BOQ, BBS, cost reports (engineers live in Excel)</div>
+    <div class="sal-item"><span class="badge red">GAP</span> AI/ML — cost prediction, risk scoring, document NLP (Phase 11)</div>
+    <div class="sal-item"><span class="badge red">GAP</span> Real IFC import — ifcopenshell for actual BIM files from Revit/ArchiCAD</div>
+  </div>
+</div>
+
+<div class="sal-card" style="margin-bottom:12px">
+  <h3>📊 Competitive Landscape</h3>
+  <table class="comp-table">
+    <tr>
+      <th>Feature</th>
+      <th>NagaForge</th>
+      <th>Procore</th>
+      <th>Buildertrend</th>
+      <th>Autodesk Construction</th>
+      <th>Oracle Primavera</th>
+    </tr>
+    <tr><td>Project/Task Management</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+    <tr><td>CPM/PERT Scheduling</td><td class="tick">✓</td><td class="part">~</td><td class="cross">✗</td><td class="part">~</td><td class="tick">✓</td></tr>
+    <tr><td>EVM (CPI/SPI/TCPI)</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="tick">✓</td></tr>
+    <tr><td>IS 456 Structural Calcs</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+    <tr><td>IS 800 Steel Design</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+    <tr><td>NBCC / ASCE / Eurocode</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+    <tr><td>IS 10262 Mix Design</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+    <tr><td>BIM Viewer</td><td class="part">~</td><td class="tick">✓</td><td class="cross">✗</td><td class="tick">✓</td><td class="cross">✗</td></tr>
+    <tr><td>Safety PTW / Risk Matrix</td><td class="tick">✓</td><td class="tick">✓</td><td class="part">~</td><td class="part">~</td><td class="cross">✗</td></tr>
+    <tr><td>IS 516 QC Cube Tests</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+    <tr><td>Multi-tenant SaaS</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td></tr>
+    <tr><td>Open Source / Free</td><td class="tick">✓</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td><td class="cross">✗</td></tr>
+    <tr><td>Mobile App</td><td class="cross">✗ *pending*</td><td class="tick">✓</td><td class="tick">✓</td><td class="tick">✓</td><td class="part">~</td></tr>
+    <tr><td>Pricing (per user/mo)</td><td style="color:#4ade80;font-weight:700">Free / $29-299</td><td style="color:#f87171">$375+</td><td style="color:#f87171">$299+</td><td style="color:#f87171">$500+</td><td style="color:#f87171">$1500+</td></tr>
+  </table>
+</div>
+
+<div class="sal-card">
+  <h3>🎯 Recommended Go-to-Market Strategy</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:8px">
+    <div style="background:#0f172a;border-radius:8px;padding:12px">
+      <div style="color:#38bdf8;font-weight:700;font-size:12px;margin-bottom:6px">Niche #1 — India Structural Firms</div>
+      <div style="font-size:11px;color:#94a3b8">Small-mid structural consultancies (5-50 staff) in India who currently use STAAD/ETABS for calcs and Tally/Excel for project management. NagaForge replaces both. ₹999–₹4999/user/month.</div>
+    </div>
+    <div style="background:#0f172a;border-radius:8px;padding:12px">
+      <div style="color:#38bdf8;font-weight:700;font-size:12px;margin-bottom:6px">Niche #2 — Canadian/Indian EPC firms</div>
+      <div style="font-size:11px;color:#94a3b8">EPC companies working across India + Canada needing IS + NBCC compliance in one tool. No competitor offers this. White-label for larger firms.</div>
+    </div>
+    <div style="background:#0f172a;border-radius:8px;padding:12px">
+      <div style="color:#38bdf8;font-weight:700;font-size:12px;margin-bottom:6px">Niche #3 — SaaS Resellers</div>
+      <div style="font-size:11px;color:#94a3b8">White-label to construction software resellers in Middle East / Southeast Asia. The multi-tenant + white-label layer makes this viable on day 1.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

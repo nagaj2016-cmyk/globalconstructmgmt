@@ -1,0 +1,31 @@
+{
+  "project_id": 8,
+  "totals": {
+    "draft": 0,
+    "prepared": 0,
+    "checked": 0,
+    "approved": 1,
+    "superseded": 0
+  },
+  "total_calculations": 1,
+  "approved": 1,
+  "awaiting_action": 0,
+  "items": [
+    {
+      "id": 1,
+      "title": "Beam B12 \u2014 Level 3",
+      "calculator": "RCC Beam \u2014 IS 456:2000",
+      "code_basis": "IS 456:2000",
+      "revision": 1,
+      "signoff_status": "approved",
+      "is_current": true,
+      "result_status": null,
+      "prepared_by": "Demo User",
+      "checked_by": "R. Krishnan (Checker)",
+      "approved_by": "S. Mehta, P.E. (Approver)",
+      "approved_at": "2026-07-06T02:03:23.824347",
+      "supersedes_id": null,
+      "created_at": "2026-07-06T02:03:23"
+    }
+  ]
+}

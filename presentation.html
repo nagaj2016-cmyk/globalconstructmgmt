@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NagaForge — Product Presentation (real values)</title>
+<style>
+  :root{
+    --blue:#1e40af; --blue2:#3b82f6; --ink:#0f172a; --slate:#334155;
+    --muted:#64748b; --bg:#0b1220; --card:#111a2e; --line:#22304d;
+    --green:#16a34a; --amber:#d97706; --red:#dc2626; --paper:#f8fafc;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);
+    color:#e2e8f0;overflow:hidden}
+  .stage{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;
+    justify-content:center;padding:6vh 8vw;opacity:0;transform:translateY(18px);
+    transition:opacity .6s ease,transform .6s ease}
+  .slide.active{display:flex;opacity:1;transform:translateY(0)}
+  .kicker{color:var(--blue2);font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+    font-size:clamp(11px,1.1vw,15px);margin-bottom:14px}
+  h1{font-size:clamp(30px,5vw,68px);line-height:1.05;font-weight:800;color:#fff;letter-spacing:-.02em}
+  h2{font-size:clamp(24px,3.4vw,46px);font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-.01em}
+  .sub{color:#94a3b8;font-size:clamp(15px,1.8vw,23px);margin-top:16px;max-width:60ch;line-height:1.5}
+  .grid{display:grid;gap:18px;margin-top:34px;width:100%;max-width:1100px}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;text-align:left}
+  .card .lab{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+  .card .val{color:#fff;font-weight:800;font-size:clamp(20px,2.6vw,34px);margin-top:6px}
+  .card .val.small{font-size:clamp(15px,1.6vw,20px)}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:#1e293b;border:1px solid var(--line);
+    border-radius:999px;padding:8px 16px;font-size:clamp(13px,1.3vw,17px);color:#cbd5e1;margin:6px}
+  .chip b{color:#fff}
+  .pill{padding:4px 12px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.05em}
+  .pill.g{background:rgba(22,163,74,.15);color:#4ade80;border:1px solid rgba(22,163,74,.4)}
+  .pill.a{background:rgba(217,119,6,.15);color:#fbbf24;border:1px solid rgba(217,119,6,.4)}
+  .pill.r{background:rgba(220,38,38,.15);color:#f87171;border:1px solid rgba(220,38,38,.4)}
+  .flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:30px}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;text-align:center;min-width:150px}
+  .step .who{color:#fff;font-weight:800;font-size:18px}.step .st{color:#94a3b8;font-size:13px;margin-top:4px}
+  .arrow{color:var(--blue2);font-size:26px;font-weight:800}
+  .num{font-variant-numeric:tabular-nums}
+  .big{font-size:clamp(44px,8vw,120px);font-weight:900;color:#fff;line-height:1;letter-spacing:-.03em}
+  .accent{color:var(--blue2)}
+  .paper{background:var(--paper);color:#0f172a;border-radius:14px;padding:26px 30px;max-width:820px;width:100%;text-align:left;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .paper .ribbon{display:inline-block;background:var(--green);color:#fff;font-weight:800;padding:4px 14px;border-radius:6px;font-size:13px;letter-spacing:.1em}
+  .paper h3{font-size:22px;margin:12px 0 4px}
+  .paper .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:15px}
+  .paper .row b{color:#0f172a}.paper .label{color:#64748b}
+  .sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px}
+  .sign div{border-top:2px solid #cbd5e1;padding-top:6px;font-size:13px;color:#334155}
+  .sign b{display:block;color:#0f172a;font-size:14px}
+  .foot{position:absolute;bottom:26px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 40px;color:#475569;font-size:13px}
+  .brand{display:flex;align-items:center;gap:10px;color:#93c5fd;font-weight:700}
+  .logo{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
+  .progress{position:absolute;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue),var(--blue2));width:0;transition:width .3s linear}
+  .dots{display:flex;gap:7px}
+  .dot{width:9px;height:9px;border-radius:50%;background:#334155}.dot.on{background:var(--blue2);transform:scale(1.25)}
+  .controls{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5}
+  .btn{background:#1e293b;border:1px solid var(--line);color:#cbd5e1;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:14px}
+  .btn:hover{background:#243044}
+  .hint{position:absolute;top:18px;right:22px;color:#475569;font-size:12px}
+  .verified{display:inline-flex;align-items:center;gap:8px;color:#4ade80;font-weight:700;font-size:14px;margin-top:26px}
+  ul.clean{list-style:none;margin-top:24px;text-align:left;max-width:760px}
+  ul.clean li{padding:10px 0;border-bottom:1px solid var(--line);font-size:clamp(15px,1.7vw,21px);color:#cbd5e1;display:flex;gap:12px}
+  ul.clean li::before{content:"✓";color:#4ade80;font-weight:900}
+  .fade-up{animation:fu .7s ease both}
+  @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="hint">← → navigate · space = play/pause</div>
+<div class="stage" id="stage">
+
+  <!-- 1 -->
+  <section class="slide active">
+    <div class="kicker">globalconstructmgmt.com</div>
+    <h1>NagaForge</h1>
+    <div class="sub">The cloud structural-calculation &amp; <b style="color:#fff">submission-grade calc-sheet</b> platform for consulting engineers — built for India, Africa &amp; the Gulf.</div>
+    <div class="verified">● Every number in this deck is produced by the real API</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="kicker">The gap nobody fills</div>
+    <h2>A calculator gives you a number.<br/>We give you a <span class="accent">sealed, checked, audit-trailed</span> calc sheet.</h2>
+    <div class="grid g3">
+      <div class="card"><div class="lab">Calculator libraries</div><div class="val small">Compute a value. No project, no check, no seal.</div></div>
+      <div class="card"><div class="lab">Desktop tools (STAAD/ETABS)</div><div class="val small">Powerful, costly, single-user, no workflow.</div></div>
+      <div class="card" style="border-color:var(--blue2)"><div class="lab" style="color:#93c5fd">NagaForge</div><div class="val small">Design → check → approve → sealed sheet, multi-country, cloud, SME price.</div></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="kicker">Step 1 — a real IS 456:2000 beam design</div>
+    <h2>Design a beam. Get code-cited results.</h2>
+    <div class="grid g4">
+      <div class="card"><div class="lab">Input</div><div class="val">6 m span</div></div>
+      <div class="card"><div class="lab">Result</div><div class="val">Doubly<br/>Reinforced</div></div>
+      <div class="card"><div class="lab">Ast required</div><div class="val"><span class="num" data-count="1651">0</span> mm²</div></div>
+      <div class="card"><div class="lab">Reinforcement</div><div class="val">9 – #16</div></div>
+    </div>
+    <div class="chip" style="margin-top:24px">Proof source: <b>Bureau of Indian Standards</b> — Government of India</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="kicker">Step 2 — the sign-off workflow</div>
+    <h2>Prepared → Checked → Approved. Enforced.</h2>
+    <div class="flow">
+      <div class="step"><div class="who">Demo User</div><div class="st">Prepared</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="who">R. Krishnan</div><div class="st">Checked</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="who">S. Mehta, P.E.</div><div class="st">Approved</div></div>
+    </div>
+    <div class="grid g2" style="max-width:820px;margin-top:26px">
+      <div class="card"><span class="pill r">HTTP 403</span><div class="val small" style="margin-top:10px">Preparer cannot check their own calc — separation of duties.</div></div>
+      <div class="card"><span class="pill a">HTTP 409</span><div class="val small" style="margin-top:10px">Approved calc is locked &amp; immutable — delete blocked.</div></div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="kicker">Step 3 — the deliverable</div>
+    <h2>A submission-grade calc sheet.</h2>
+    <div class="paper fade-up">
+      <span class="ribbon">APPROVED</span>
+      <h3>Beam B12 — Level 3 slab · IS 456:2000</h3>
+      <div class="row"><span class="label">Ast required</span><b>1651 mm² → 9 – #16</b></div>
+      <div class="row"><span class="label">Shear</span><b>2L – #8 @ 250 c/c</b></div>
+      <div class="row"><span class="label">Official source</span><b>Bureau of Indian Standards (Gov. of India)</b></div>
+      <div class="sign">
+        <div><b>Demo User</b>Prepared</div>
+        <div><b>R. Krishnan</b>Checked</div>
+        <div><b>S. Mehta, P.E.</b>Approved</div>
+      </div>
+    </div>
+    <div class="sub" style="margin-top:16px">Branded PDF · certification block · legal note · official code citation.</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <div class="kicker">Step 4 — register &amp; revision control</div>
+    <h2>Every calc tracked. Every change diffed.</h2>
+    <div class="grid g2" style="max-width:900px">
+      <div class="card">
+        <div class="lab">Project calculation register</div>
+        <div class="val"><span class="pill g">Approved: 1</span></div>
+        <div class="val small" style="margin-top:8px">Rolled up by status — the principal engineer's view.</div>
+      </div>
+      <div class="card">
+        <div class="lab">Revision diff (rev 1 → rev 2)</div>
+        <div class="val small num">Mu: 150 → <span class="accent">180</span> kN·m</div>
+        <div class="val small num">f<sub>ck</sub>: 25 → <span class="accent">30</span> MPa</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <div class="kicker">Step 5 — design flows to quantities</div>
+    <h2>One design → bar-bending schedule → BOQ.</h2>
+    <div class="grid g4">
+      <div class="card"><div class="lab">Reinforcement</div><div class="val">9 – #16<br/><span class="val small">#8 stirrups</span></div></div>
+      <div class="card"><div class="lab">Steel (BBS)</div><div class="val"><span class="num" data-count="153">0</span> kg</div></div>
+      <div class="card"><div class="lab">Breakdown ₹</div><div class="val small">Concrete 4,410<br/>Formwork 3,300<br/>Steel 13,014</div></div>
+      <div class="card" style="border-color:var(--blue2)"><div class="lab" style="color:#93c5fd">BOQ total</div><div class="val">₹ <span class="num" data-count="20724">0</span></div></div>
+    </div>
+    <div class="sub" style="margin-top:20px">Design and quantities stay linked — one source of truth.</div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <div class="kicker">Step 6 — the engagement layer</div>
+    <h2>Comment, @mention, get notified. Nothing falls through.</h2>
+    <div class="grid g2" style="max-width:900px">
+      <div class="card"><div class="lab">Review comment</div><div class="val small">“<b style="color:#93c5fd">@p3checker</b> please verify shear spacing” → checker notified instantly.</div></div>
+      <div class="card"><div class="lab">Sign-off events</div><div class="val small">Preparer notified: <b>Calculation checked</b>, <b>Calculation approved</b>.</div></div>
+    </div>
+    <div class="chip" style="margin-top:22px">Immutable audit trail: <b>CREATE → SUBMIT → CHECK → APPROVE</b> — who &amp; when.</div>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <div class="kicker">The moat</div>
+    <h2>Multi-country. Verified sources. One platform.</h2>
+    <div class="flow" style="margin-top:10px">
+      <span class="chip"><b>IS 456 / 800 / 1893</b> India</span>
+      <span class="chip"><b>AISC 360</b> USA</span>
+      <span class="chip"><b>CSA S16 / NBC</b> Canada</span>
+      <span class="chip"><b>Eurocode</b> UK/EU</span>
+      <span class="chip"><b>SANS · ECP · RPS</b> Africa</span>
+    </div>
+    <div class="grid g3" style="max-width:1000px;margin-top:20px">
+      <div class="card"><div class="lab">Countries</div><div class="val"><span class="num" data-count="60">0</span>+</div><div class="val small">incl. all 54 African states</div></div>
+      <div class="card"><div class="lab">Languages</div><div class="val">EN · FR · HI · AR</div><div class="val small">DB-driven, RTL-ready</div></div>
+      <div class="card"><div class="lab">Sources</div><div class="val small">Government / regulator / official publisher — verified links on every result</div></div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <div class="kicker">Built on trust, not hype</div>
+    <h2>Verified — and honest about limits.</h2>
+    <ul class="clean">
+      <li>Calculators validated against published worked examples (IS, AISC, CSA)</li>
+      <li>Governance test <b>fails the build</b> if a calculator is called "verified" without a fixture</li>
+      <li>Every sheet states: preliminary — the responsible licensed engineer must verify &amp; seal</li>
+      <li>Multi-tenant isolation, RBAC, audit trail, PostgreSQL-ready</li>
+    </ul>
+    <div class="verified"><span class="num" data-count="39">0</span> automated tests — all passing</div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide">
+    <div class="kicker">Prepare · Check · Approve · Seal</div>
+    <h1>Let’s build the standard<br/>for the markets nobody serves.</h1>
+    <div class="sub">NagaForge — globalconstructmgmt.com</div>
+  </section>
+
+</div>
+
+<div class="controls">
+  <button class="btn" onclick="go(-1)">‹ Prev</button>
+  <button class="btn" id="playBtn" onclick="toggle()">⏸ Pause</button>
+  <button class="btn" onclick="go(1)">Next ›</button>
+</div>
+
+<div class="foot">
+  <div class="brand"><div class="logo">N</div> NagaForge</div>
+  <div class="dots" id="dots"></div>
+  <div>Real values · not mockups</div>
+</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  const dots=document.getElementById('dots');
+  const prog=document.getElementById('progress');
+  const playBtn=document.getElementById('playBtn');
+  let i=0, playing=true, timer=null, DUR=8000;
+  slides.forEach((_,k)=>{const d=document.createElement('div');d.className='dot'+(k===0?' on':'');dots.appendChild(d);});
+  const dotEls=[...dots.children];
+
+  function animateCounts(slide){
+    slide.querySelectorAll('[data-count]').forEach(el=>{
+      const target=+el.dataset.count; let cur=0; const t0=performance.now(), D=1100;
+      function tick(t){const p=Math.min(1,(t-t0)/D); const e=1-Math.pow(1-p,3);
+        el.textContent=Math.round(target*e).toLocaleString(); if(p<1)requestAnimationFrame(tick);}
+      requestAnimationFrame(tick);
+    });
+  }
+  function show(n){
+    slides[i].classList.remove('active'); dotEls[i].classList.remove('on');
+    i=(n+slides.length)%slides.length;
+    slides[i].classList.add('active'); dotEls[i].classList.add('on');
+    animateCounts(slides[i]);
+  }
+  function go(d){show(i+d); restart();}
+  function restart(){prog.style.width='0';clearInterval(timer); if(!playing)return;
+    let start=Date.now();
+    timer=setInterval(()=>{const p=(Date.now()-start)/DUR; prog.style.width=Math.min(100,p*100)+'%';
+      if(p>=1){show(i+1);start=Date.now();}},60);
+  }
+  function toggle(){playing=!playing; playBtn.textContent=playing?'⏸ Pause':'▶ Play'; restart();}
+  document.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight')go(1); else if(e.key==='ArrowLeft')go(-1);
+    else if(e.key===' '){e.preventDefault();toggle();}
+  });
+  animateCounts(slides[0]); restart();
+</script>
+</body>
+</html>

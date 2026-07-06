@@ -1,0 +1,28 @@
+Signed in as Demo User (company_id=3, demo=True)
+Project #8 created.
+Design type : Doubly Reinforced
+Ast required: 1651.3 mm2  -> bars 9 — #16
+Stirrups    : 2L — #8 @ 250 c/c
+Proof source: Bureau of Indian Standards (BIS) (Government of India / National Standards Body)
+Prepared calc #1 by Demo User (status=draft)
+Preparer tries to self-check -> HTTP 403 (blocked: separation of duties)
+Checked by R. Krishnan (Checker) (status=checked)
+Approved by S. Mehta, P.E. (Approver) (status=approved, locked=True)
+Try to delete an approved calc -> HTTP 409 (immutable)
+calc_sheet.pdf written (4911 bytes, header=b'%PDF-')
+Register totals: {'draft': 0, 'prepared': 0, 'checked': 0, 'approved': 1, 'superseded': 0}  (approved=1)
+Revision 2 (calc #2) supersedes #1
+Inputs changed: ['Mu_kNm', 'fck']
+  fck: {'from': 25, 'to': 30}
+Derived reinforcement: {'n_main_bars': 9, 'main_bar_dia_mm': 16, 'stirrup_dia_mm': 8, 'stirrup_spacing_mm': 250.0}
+BBS total steel : 153.1 kg
+BOQ total cost  : INR 20724.0
+Comment posted (HTTP 201); @checker mentioned.
+Checker inbox: 1 unread -> 'You were mentioned on 'Beam B12 — Level 3''
+Section library (IS 808): 16 sections available for dropdowns
+Register exported to CSV (458 bytes)
+  2026-07-06T02:03:24  COMMENT  by demo
+  2026-07-06T02:03:23  APPROVE  by approver
+  2026-07-06T02:03:23  CHECK    by checker
+  2026-07-06T02:03:23  SUBMIT   by demo
+  2026-07-06T02:03:23  CREATE   by demo

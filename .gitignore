@@ -1,0 +1,28 @@
+# Databases (never commit tenant data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Env / secrets
+.env
+.env.*
+
+# Uploads (runtime user content)
+uploads/
+backend/uploads/
+
+# Node / frontend build
+node_modules/
+dist/
+build/
+*.log
+
+# OS
+.DS_Store

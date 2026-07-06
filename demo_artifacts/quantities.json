@@ -1,0 +1,69 @@
+{
+  "calculation_id": 1,
+  "beam": "Beam B12 \u2014 Level 3",
+  "derived_from": {
+    "n_main_bars": 9,
+    "main_bar_dia_mm": 16,
+    "stirrup_dia_mm": 8,
+    "stirrup_spacing_mm": 250.0
+  },
+  "bbs": {
+    "element": "Beam",
+    "id": "Beam B12 \u2014 Level 3",
+    "dimensions": "300\u00d7350 mm, L=6000 mm",
+    "bars": [
+      {
+        "bar_mark": "1",
+        "description": "Bottom main bars",
+        "dia_mm": 16,
+        "no_of_bars": 9,
+        "cut_length_mm": 7290,
+        "weight_kg_m": 1.5802,
+        "total_weight_kg": 103.68,
+        "shape": "Straight with hooks"
+      },
+      {
+        "bar_mark": "2",
+        "description": "Top hanger bars",
+        "dia_mm": 16,
+        "no_of_bars": 2,
+        "cut_length_mm": 7290,
+        "weight_kg_m": 1.5802,
+        "total_weight_kg": 23.04,
+        "shape": "Straight"
+      },
+      {
+        "bar_mark": "4",
+        "description": "Stirrups (2L-#8): Dense @ 77 (ends l/4), Normal @ 250.0",
+        "dia_mm": 8,
+        "no_of_bars": 53,
+        "cut_length_mm": 1260,
+        "weight_kg_m": 0.3951,
+        "total_weight_kg": 26.38,
+        "shape": "Rectangular closed stirrup"
+      }
+    ],
+    "total_steel_kg": 153.1,
+    "code": "IS 2502:2014"
+  },
+  "boq": {
+    "element": "Beam",
+    "id": "Beam B12 \u2014 Level 3",
+    "quantity": {
+      "concrete_m3": 0.63,
+      "formwork_m2": 6.0,
+      "steel_kg": 153.1
+    },
+    "rates_INR": {
+      "concrete": 7000,
+      "formwork": 550,
+      "steel": 85
+    },
+    "cost_INR": {
+      "concrete": 4410.0,
+      "formwork": 3300.0,
+      "steel": 13014.0,
+      "total": 20724.0
+    }
+  }
+}

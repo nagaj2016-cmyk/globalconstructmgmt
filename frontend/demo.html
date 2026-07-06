@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NagaForge — Interactive Product Demo</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root{
+  --brand:#1a56db;--brand-dark:#1347be;--brand-light:#ebf3ff;
+  --accent:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;--orange:#f97316;
+  --bg:#f0f4fa;--card:#fff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;
+  --sidebar-w:240px;--header-h:60px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+#topbar{height:var(--header-h);background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);z-index:100;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.15rem;color:var(--brand)}
+.logo i{font-size:1.3rem}
+.logo span{color:var(--accent)}
+.topbar-spacer{flex:1}
+.tb-badge{background:var(--brand-light);color:var(--brand);padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600}
+.tb-company{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem}
+
+/* ── LAYOUT ──────────────────────────────────────────────────── */
+#app{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ─────────────────────────────────────────────────── */
+#sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.nav-section{padding:8px 12px 4px;font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-radius:6px;margin:1px 6px;font-size:.85rem;color:var(--text);transition:all .15s;position:relative}
+.nav-item:hover{background:var(--bg)}
+.nav-item.active{background:var(--brand-light);color:var(--brand);font-weight:600}
+.nav-item i{width:18px;text-align:center;font-size:.95rem}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:.65rem;padding:2px 6px;border-radius:10px;font-weight:700}
+.nav-badge.green{background:var(--green)}
+.nav-badge.orange{background:var(--orange)}
+
+/* ── MAIN CONTENT ────────────────────────────────────────────── */
+#main{flex:1;overflow-y:auto;padding:24px}
+.page{display:none}.page.active{display:block}
+
+/* ── CARDS & GRID ────────────────────────────────────────────── */
+.page-title{font-size:1.25rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.page-title i{color:var(--brand)}
+.grid{display:grid;gap:16px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+
+.card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid var(--border)}
+.card-title{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;font-weight:600}
+.stat-value{font-size:1.8rem;font-weight:700;color:var(--text)}
+.stat-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+.stat-icon{position:absolute;right:16px;top:16px;font-size:1.6rem;opacity:.12}
+.card.stat{position:relative;overflow:hidden}
+.card.stat::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:currentColor;opacity:.05}
+
+/* ── PROGRESS BAR ────────────────────────────────────────────── */
+.pbar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:6px 0}
+.pbar-fill{height:100%;border-radius:4px;transition:width .6s}
+
+/* ── TABLE ───────────────────────────────────────────────────── */
+.tbl{width:100%;border-collapse:collapse;font-size:.84rem}
+.tbl th{padding:10px 12px;text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:2px solid var(--border);background:#fafbfd}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#f8faff}
+
+/* ── BADGES ──────────────────────────────────────────────────── */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-yellow{background:#fef3c7;color:#92400e}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-purple{background:#ede9fe;color:#5b21b6}
+.badge-gray{background:#f1f5f9;color:#475569}
+.badge-orange{background:#ffedd5;color:#9a3412}
+
+/* ── BIM VIEWER ──────────────────────────────────────────────── */
+#bim-canvas{width:100%;height:340px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:12px;position:relative;overflow:hidden}
+.bim-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px}
+.bim-floor{position:absolute;border:2px solid rgba(99,179,237,.6);background:rgba(99,179,237,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:.7rem;font-weight:600;border-radius:4px;transition:all .3s;cursor:pointer}
+.bim-floor:hover,.bim-floor.sel{border-color:#63b3ed;background:rgba(99,179,237,.22);color:#fff}
+.bim-col{position:absolute;width:18px;background:rgba(251,191,36,.8);border-radius:3px;cursor:pointer;transition:all .2s}
+.bim-col:hover{background:#fbbf24;box-shadow:0 0 8px #fbbf24}
+.bim-legend{position:absolute;bottom:12px;right:12px;display:flex;flex-direction:column;gap:6px}
+.bim-leg-item{display:flex;align-items:center;gap:8px;font-size:.72rem;color:rgba(255,255,255,.8)}
+.bim-leg-dot{width:12px;height:12px;border-radius:2px}
+.bim-toolbar{position:absolute;top:12px;left:12px;display:flex;gap:8px}
+.bim-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:.75rem;backdrop-filter:blur(4px)}
+.bim-btn:hover,.bim-btn.active{background:rgba(99,179,237,.4)}
+.bim-stats{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:4px}
+.bim-stat{background:rgba(0,0,0,.5);color:#fff;padding:4px 10px;border-radius:6px;font-size:.72rem;backdrop-filter:blur(4px)}
+
+/* ── CHART BARS ──────────────────────────────────────────────── */
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;padding-top:10px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height .5s}
+.chart-label{font-size:.65rem;color:var(--muted)}
+.chart-val{font-size:.7rem;font-weight:700;color:var(--text)}
+
+/* ── GAUGE ───────────────────────────────────────────────────── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.gauge{width:90px;height:45px;overflow:hidden;position:relative}
+.gauge svg{position:absolute;top:0;left:0}
+.gauge-val{font-size:1.2rem;font-weight:700}
+.gauge-label{font-size:.72rem;color:var(--muted)}
+
+/* ── TIMELINE ────────────────────────────────────────────────── */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:12px;position:relative}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:10px;top:24px;bottom:0;width:2px;background:var(--border)}
+.tl-dot{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;z-index:1}
+.tl-body{padding-bottom:16px;flex:1}
+.tl-title{font-size:.85rem;font-weight:600}
+.tl-sub{font-size:.75rem;color:var(--muted)}
+
+/* ── TOGGLE DEMO ─────────────────────────────────────────────── */
+.demo-banner{background:linear-gradient(90deg,var(--brand),#7c3aed);color:#fff;padding:8px 20px;font-size:.8rem;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.demo-banner i{opacity:.8}
+</style>
+</head>
+<body>
+
+<!-- DEMO BANNER -->
+<div class="demo-banner">
+  <i class="fas fa-play-circle"></i>
+  <strong>Interactive Demo</strong> — NagaForge Construction ERP &nbsp;|&nbsp; All data is sample data.
+  <span style="margin-left:auto;opacity:.8">Click any nav item to explore modules ↓</span>
+</div>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo"><i class="fas fa-hard-hat"></i>Naga<span>Forge</span></div>
+  <div class="topbar-spacer"></div>
+  <div class="tb-badge">Professional Plan</div>
+  <div class="tb-company"><i class="fas fa-building"></i>Demo Residential Tower</div>
+  <div class="tb-avatar">NF</div>
+</div>
+
+<div id="app">
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div style="padding:12px 8px 4px">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><i class="fas fa-tachometer-alt"></i>Dashboard</div>
+    <div class="nav-item" onclick="showPage('projects',this)"><i class="fas fa-folder-open"></i>Projects<span class="nav-badge green">2</span></div>
+
+    <div class="nav-section">Engineering</div>
+    <div class="nav-item" onclick="showPage('structural',this)"><i class="fas fa-drafting-compass"></i>Structural Design</div>
+    <div class="nav-item" onclick="showPage('bim',this)"><i class="fas fa-cube"></i>BIM Viewer</div>
+    <div class="nav-item" onclick="showPage('scheduling',this)"><i class="fas fa-project-diagram"></i>Scheduling</div>
+
+    <div class="nav-section">Site Operations</div>
+    <div class="nav-item" onclick="showPage('site_ops',this)"><i class="fas fa-hard-hat"></i>Site Diary</div>
+    <div class="nav-item" onclick="showPage('equipment',this)"><i class="fas fa-truck"></i>Equipment</div>
+    <div class="nav-item" onclick="showPage('workers',this)"><i class="fas fa-users"></i>Workers</div>
+
+    <div class="nav-section">Quality & Safety</div>
+    <div class="nav-item" onclick="showPage('quality',this)"><i class="fas fa-microscope"></i>Quality Control<span class="nav-badge orange">1</span></div>
+    <div class="nav-item" onclick="showPage('safety',this)"><i class="fas fa-shield-alt"></i>HSE Safety<span class="nav-badge">2</span></div>
+
+    <div class="nav-section">Commercial</div>
+    <div class="nav-item" onclick="showPage('commercial',this)"><i class="fas fa-file-invoice-dollar"></i>Commercial &amp; BOQ</div>
+    <div class="nav-item" onclick="showPage('invoices',this)"><i class="fas fa-receipt"></i>Invoices</div>
+
+    <div class="nav-section">Platform</div>
+    <div class="nav-item" onclick="showPage('documents',this)"><i class="fas fa-folder"></i>Documents</div>
+    <div class="nav-item" onclick="showPage('reports',this)"><i class="fas fa-chart-bar"></i>Reports</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title"><i class="fas fa-tachometer-alt"></i>Project Dashboard</div>
+
+  <div class="grid grid-4" style="margin-bottom:16px">
+    <div class="card stat" style="color:var(--brand)">
+      <i class="fas fa-folder-open stat-icon"></i>
+      <div class="card-title">Active Projects</div>
+      <div class="stat-value">2</div>
+      <div class="stat-sub">1 active · 1 planning</div>
+    </div>
+    <div class="card stat" style="color:var(--green)">
+      <i class="fas fa-users stat-icon"></i>
+      <div class="card-title">Workers On Site</div>
+      <div class="stat-value">47</div>
+      <div class="stat-sub">↑ 3 from yesterday</div>
+    </div>
+    <div class="card stat" style="color:var(--accent)">
+      <i class="fas fa-rupee-sign stat-icon"></i>
+      <div class="card-title">Budget Utilised</div>
+      <div class="stat-value">27%</div>
+      <div class="stat-sub">₹1.2Cr of ₹4.5Cr</div>
+    </div>
+    <div class="card stat" style="color:var(--red)">
+      <i class="fas fa-exclamation-triangle stat-icon"></i>
+      <div class="card-title">Open NCRs</div>
+      <div class="stat-value">1</div>
+      <div class="stat-sub">1 minor · 0 major</div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Project Progress</div>
+      <div style="margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px"><span><strong>Demo Residential Tower</strong></span><span style="color:var(--brand);font-weight:700">27%</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:27%;background:var(--brand)"></div></div>
+        <div style="font-size:.75rem;color:var(--muted)">G+7 RCC · ₹4.5Cr · Structural phase</div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:4px"><span><strong>Demo Commercial Complex</strong></span><span style="color:var(--muted);font-weight:700">0%</span></div>
+        <div class="pbar"><div class="pbar-fill" style="width:0%;background:var(--purple)"></div></div>
+        <div style="font-size:.75rem;color:var(--muted)">G+3 Steel · ₹2.8Cr · Planning stage</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Monthly Expense Trend (₹ Lakhs)</div>
+      <div class="chart-bars" id="expense-chart"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card">
+      <div class="card-title">Task Status</div>
+      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--green)">3</div><div style="font-size:.72rem;color:var(--muted)">Done</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--brand)">4</div><div style="font-size:.72rem;color:var(--muted)">In Progress</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--muted)">5</div><div style="font-size:.72rem;color:var(--muted)">Todo</div></div>
+        <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--red)">1</div><div style="font-size:.72rem;color:var(--muted)">Urgent</div></div>
+      </div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px;font-size:.82rem">
+        <div style="display:flex;justify-content:space-between"><span>🔴 Safety audit — Scaffolding</span><span class="badge badge-red">Urgent</span></div>
+        <div style="display:flex;justify-content:space-between"><span>🟡 Structural drawings — Found.</span><span class="badge badge-blue">Active</span></div>
+        <div style="display:flex;justify-content:space-between"><span>🟢 TMT bars procurement</span><span class="badge badge-green">Done</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Safety This Month</div>
+      <div style="display:flex;justify-content:space-around;margin-top:10px">
+        <div class="gauge-wrap">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--green)">4</div>
+          <div class="gauge-label">Toolbox Talks</div>
+        </div>
+        <div class="gauge-wrap">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--orange)">1</div>
+          <div class="gauge-label">Near Miss</div>
+        </div>
+        <div class="gauge-wrap">
+          <div style="font-size:1.8rem;font-weight:700;color:var(--brand)">0</div>
+          <div class="gauge-label">LTI</div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div style="font-size:.8rem;margin-bottom:4px;display:flex;justify-content:space-between"><span>PPE Compliance</span><strong>92%</strong></div>
+        <div class="pbar"><div class="pbar-fill" style="width:92%;background:var(--green)"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Quality Summary</div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;font-size:.83rem">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span>Cube Tests</span><span class="badge badge-green">3 Pass · 0 Fail</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span>QC Inspections</span><span class="badge badge-yellow">3 Pass · 1 Fail</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span>NCRs Open</span><span class="badge badge-orange">1 Minor</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center"><span>Next Inspection</span><span class="badge badge-blue">In 2 days</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ PROJECTS ══════════════ -->
+<div class="page" id="page-projects">
+  <div class="page-title"><i class="fas fa-folder-open"></i>Projects</div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div><div style="font-weight:700;font-size:1rem">Demo Residential Tower</div><div style="color:var(--muted);font-size:.8rem">DEMO-PRJ-001</div></div>
+        <span class="badge badge-green">Active</span>
+      </div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:12px">G+7 RCC framed residential tower. IS 456 / IS 13920 seismic design. Mumbai.</div>
+      <div class="grid grid-2" style="gap:8px;margin-bottom:12px">
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Budget</div><div style="font-weight:700">₹4.5 Cr</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Spent</div><div style="font-weight:700;color:var(--orange)">₹1.2 Cr</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Start</div><div style="font-weight:700">Mar 2026</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Deadline</div><div style="font-weight:700">Jun 2027</div></div>
+      </div>
+      <div style="font-size:.8rem;margin-bottom:4px;display:flex;justify-content:space-between"><span>Overall Progress</span><strong>27%</strong></div>
+      <div class="pbar"><div class="pbar-fill" style="width:27%;background:var(--brand)"></div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div><div style="font-weight:700;font-size:1rem">Demo Commercial Complex</div><div style="color:var(--muted);font-size:.8rem">DEMO-PRJ-002</div></div>
+        <span class="badge badge-purple">Planning</span>
+      </div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:12px">G+3 steel-framed commercial complex. IS 800:2007 design. Starting in 30 days.</div>
+      <div class="grid grid-2" style="gap:8px;margin-bottom:12px">
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Budget</div><div style="font-weight:700">₹2.8 Cr</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Spent</div><div style="font-weight:700">₹0</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Start</div><div style="font-weight:700">Jul 2026</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Deadline</div><div style="font-weight:700">Dec 2027</div></div>
+      </div>
+      <div style="font-size:.8rem;margin-bottom:4px;display:flex;justify-content:space-between"><span>Overall Progress</span><strong>0%</strong></div>
+      <div class="pbar"><div class="pbar-fill" style="width:0%;background:var(--purple)"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ STRUCTURAL ══════════════ -->
+<div class="page" id="page-structural">
+  <div class="page-title"><i class="fas fa-drafting-compass"></i>Structural Design Engine</div>
+  <div class="grid grid-3" style="margin-bottom:16px">
+    <div class="card" style="border-left:4px solid var(--brand)">
+      <div class="card-title">IS 456 RCC Design</div>
+      <div style="font-size:.83rem;margin-top:6px;display:flex;flex-direction:column;gap:5px">
+        <div>✅ Beam design (IS 456 Cl. 22-26)</div>
+        <div>✅ Column design (IS 456 Cl. 39)</div>
+        <div>✅ Slab design (IS 456 Cl. 24)</div>
+        <div>✅ Foundation design (IS 1904)</div>
+        <div>✅ Seismic detailing (IS 13920)</div>
+      </div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--purple)">
+      <div class="card-title">IS 800 Steel Design</div>
+      <div style="font-size:.83rem;margin-top:6px;display:flex;flex-direction:column;gap:5px">
+        <div>✅ Beam design (IS 800 Cl. 8)</div>
+        <div>✅ Column design (IS 800 Cl. 7)</div>
+        <div>✅ Connection design</div>
+        <div>✅ AISC 360-22 check</div>
+        <div>✅ Eurocode 3 check</div>
+      </div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--green)">
+      <div class="card-title">Mix Design &amp; BBS</div>
+      <div style="font-size:.83rem;margin-top:6px;display:flex;flex-direction:column;gap:5px">
+        <div>✅ IS 10262 mix design</div>
+        <div>✅ BBS generation (IS 2502)</div>
+        <div>✅ Bar bending schedule PDF</div>
+        <div>✅ Quantity takeoff</div>
+        <div>✅ BOQ integration</div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Sample Calculation — RCC Beam (IS 456:2000)</div>
+    <div style="background:#0f172a;border-radius:8px;padding:16px;margin-top:10px;font-family:monospace;font-size:.78rem;color:#e2e8f0;line-height:1.8">
+      <div style="color:#63b3ed">// Beam B1 — Span 6.0m | M25 | Fe415 | 230×450mm</div>
+      <div>Factored Bending Moment  : <span style="color:#fbbf24">Mu = 1.5 × 112 = 168 kN·m</span></div>
+      <div>Effective Depth          : <span style="color:#fbbf24">d  = 450 - 40 - 10 = 400 mm</span></div>
+      <div>Limiting Moment capacity : <span style="color:#fbbf24">Mulim = 0.138 × fck × b × d² = 0.138×25×230×400² = 126.96 kN·m</span></div>
+      <div style="color:#f87171">→ Doubly reinforced beam required (Mu &gt; Mulim)</div>
+      <div>Tension steel (Ast)      : <span style="color:#86efac">4–20mm dia (Ast provided = 1257 mm²) ✓</span></div>
+      <div>Compression steel (Asc) : <span style="color:#86efac">2–16mm dia (Asc provided = 402 mm²) ✓</span></div>
+      <div>Shear reinforcement      : <span style="color:#86efac">8mm @ 150mm c/c (IS 456 Cl. 40.4) ✓</span></div>
+      <div style="color:#a78bfa">// Result: SAFE — All checks passed per IS 456:2000</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ BIM ══════════════ -->
+<div class="page" id="page-bim">
+  <div class="page-title"><i class="fas fa-cube"></i>BIM 3D Model Viewer</div>
+  <div class="grid grid-2" style="margin-bottom:16px;grid-template-columns:2fr 1fr">
+    <div>
+      <div id="bim-canvas">
+        <div class="bim-grid"></div>
+        <!-- Floors -->
+        <div class="bim-floor sel" style="left:40px;top:30px;width:320px;height:45px" onclick="selectFloor(this,'Ground Floor')">Ground Floor</div>
+        <div class="bim-floor" style="left:40px;top:82px;width:320px;height:45px" onclick="selectFloor(this,'First Floor')">First Floor</div>
+        <div class="bim-floor" style="left:40px;top:134px;width:320px;height:45px" onclick="selectFloor(this,'Second Floor')">Second Floor</div>
+        <div class="bim-floor" style="left:40px;top:186px;width:320px;height:45px" onclick="selectFloor(this,'Third Floor')">Third Floor</div>
+        <div class="bim-floor" style="left:40px;top:238px;width:320px;height:40px;font-size:.65rem" onclick="selectFloor(this,'Floors 4-7')">Floors 4–7 (Typical)</div>
+        <!-- Columns (yellow) -->
+        <div class="bim-col" style="left:48px;top:28px;height:255px" onclick="selectElement(this,'Column C1','M30 Concrete','450×450mm')"></div>
+        <div class="bim-col" style="left:180px;top:28px;height:255px" onclick="selectElement(this,'Column C2','M30 Concrete','450×450mm')"></div>
+        <div class="bim-col" style="left:310px;top:28px;height:255px" onclick="selectElement(this,'Column C3','M30 Concrete','450×450mm')"></div>
+        <!-- Beams -->
+        <div style="position:absolute;left:48px;top:74px;width:265px;height:8px;background:rgba(236,72,153,.7);border-radius:2px;cursor:pointer" onclick="selectElement(this,'Beam B1-GF','M30 Concrete','230×600mm')"></div>
+        <div style="position:absolute;left:48px;top:126px;width:265px;height:8px;background:rgba(236,72,153,.7);border-radius:2px;cursor:pointer" onclick="selectElement(this,'Beam B1-1F','M30 Concrete','230×600mm')"></div>
+        <div class="bim-toolbar">
+          <div class="bim-btn active">Plan</div>
+          <div class="bim-btn">3D</div>
+          <div class="bim-btn">Section</div>
+          <div class="bim-btn">Elevation</div>
+        </div>
+        <div class="bim-stats">
+          <div class="bim-stat">8 Floors</div>
+          <div class="bim-stat">25.6m Height</div>
+          <div class="bim-stat">4,800 m²</div>
+        </div>
+        <div class="bim-legend">
+          <div class="bim-leg-item"><div class="bim-leg-dot" style="background:rgba(99,179,237,.8)"></div>Slab</div>
+          <div class="bim-leg-item"><div class="bim-leg-dot" style="background:rgba(251,191,36,.8)"></div>Column</div>
+          <div class="bim-leg-item"><div class="bim-leg-dot" style="background:rgba(236,72,153,.7)"></div>Beam</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" id="bim-info">
+      <div class="card-title">Selected Element</div>
+      <div id="bim-detail" style="margin-top:10px">
+        <div style="font-weight:700;margin-bottom:8px">Ground Floor</div>
+        <div style="font-size:.82rem;display:flex;flex-direction:column;gap:6px">
+          <div><span style="color:var(--muted)">Type:</span> Slab</div>
+          <div><span style="color:var(--muted)">Material:</span> Concrete M30</div>
+          <div><span style="color:var(--muted)">Thickness:</span> 150mm</div>
+          <div><span style="color:var(--muted)">Area:</span> 12.0 × 8.0 = 96 m²</div>
+          <div><span style="color:var(--muted)">Volume:</span> 14.4 m³</div>
+          <div><span style="color:var(--muted)">Design Code:</span> IS 456:2000</div>
+          <div><span style="color:var(--muted)">Status:</span> <span class="badge badge-green">Complete</span></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
+        <div class="card-title">Elements Summary</div>
+        <div style="font-size:.82rem;margin-top:8px;display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;justify-content:space-between"><span>Columns</span><strong>32</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Beams</span><strong>64</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Slabs</span><strong>8</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Walls</span><strong>48</strong></div>
+          <div style="display:flex;justify-content:space-between"><span>Doors/Windows</span><strong>112</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="grid grid-3">
+    <div class="card"><div class="card-title">Model Info</div><div style="font-size:.83rem;margin-top:8px;display:flex;flex-direction:column;gap:5px"><div><b>Name:</b> DEMO-BIM-001</div><div><b>Version:</b> 1.2</div><div><b>Format:</b> JSON / IFC</div><div><b>Gross Area:</b> 4,800 m²</div><div><b>Height:</b> 25.6 m</div></div></div>
+    <div class="card"><div class="card-title">Clash Detection</div><div style="font-size:.83rem;margin-top:8px;display:flex;flex-direction:column;gap:5px"><div>✅ Structural vs Arch — 0 clashes</div><div>✅ Structural vs MEP — 0 clashes</div><div>⚠️ Arch vs MEP — 2 soft clashes</div></div></div>
+    <div class="card"><div class="card-title">IFC Export</div><div style="font-size:.83rem;margin-top:8px;display:flex;flex-direction:column;gap:5px"><div>✅ IFC 2x3 compatible</div><div>✅ Revit import ready</div><div>✅ Navisworks import ready</div></div></div>
+  </div>
+</div>
+
+<!-- ══════════════ SCHEDULING ══════════════ -->
+<div class="page" id="page-scheduling">
+  <div class="page-title"><i class="fas fa-project-diagram"></i>Scheduling — CPM / EVM</div>
+  <div class="grid grid-4" style="margin-bottom:16px">
+    <div class="card stat" style="color:var(--brand)"><i class="fas fa-calendar stat-icon"></i><div class="card-title">PV (Planned Value)</div><div class="stat-value">₹120L</div><div class="stat-sub">Week 12</div></div>
+    <div class="card stat" style="color:var(--green)"><i class="fas fa-check-circle stat-icon"></i><div class="card-title">EV (Earned Value)</div><div class="stat-value">₹112L</div><div class="stat-sub">SPI = 0.93</div></div>
+    <div class="card stat" style="color:var(--orange)"><i class="fas fa-coins stat-icon"></i><div class="card-title">AC (Actual Cost)</div><div class="stat-value">₹118L</div><div class="stat-sub">CPI = 0.95</div></div>
+    <div class="card stat" style="color:var(--red)"><i class="fas fa-chart-line stat-icon"></i><div class="card-title">EAC (Forecast)</div><div class="stat-value">₹473L</div><div class="stat-sub">BAC = ₹450L</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Gantt / Activity Schedule</div>
+    <div style="overflow-x:auto;margin-top:10px">
+      <table class="tbl">
+        <thead><tr><th>Activity</th><th>Duration</th><th>Start</th><th>Finish</th><th>Float</th><th>Status</th><th>Progress</th></tr></thead>
+        <tbody id="gantt-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ SITE OPS ══════════════ -->
+<div class="page" id="page-site_ops">
+  <div class="page-title"><i class="fas fa-hard-hat"></i>Site Diary</div>
+  <div class="grid grid-3" style="margin-bottom:16px">
+    <div class="card" style="grid-column:span 2">
+      <div class="card-title">Today's Site Diary — <span id="today-date"></span></div>
+      <div style="display:flex;gap:16px;margin:10px 0">
+        <div><i class="fas fa-sun" style="color:var(--accent)"></i> Sunny morning / Cloudy afternoon</div>
+        <div><i class="fas fa-thermometer-half" style="color:var(--red)"></i> 34°C</div>
+        <div><i class="fas fa-tint" style="color:var(--brand)"></i> 68% humidity</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Workers on Site</div><div style="font-size:1.3rem;font-weight:700">47</div></div>
+        <div style="background:var(--bg);border-radius:8px;padding:10px"><div style="font-size:.7rem;color:var(--muted)">Engineers</div><div style="font-size:1.3rem;font-weight:700">6</div></div>
+      </div>
+      <div style="font-size:.83rem;display:flex;flex-direction:column;gap:6px">
+        <div><strong>Work Done:</strong> Foundation concreting — Column C1-C6 completed. Cube samples taken. Formwork stripped at Basement.</div>
+        <div><strong>Materials Used:</strong> Cement 20 bags · TMT 12mm 400kg · Aggregate 3 cum</div>
+        <div><strong>Equipment:</strong> Tower Crane: 1 · Vibrator: 2 · Concrete Mixer: 1</div>
+        <div><strong>Instructions:</strong> Maintain curing for 14 days post-pour. No loading on new slab for 7 days.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Last 5 Days</div>
+      <div class="timeline" style="margin-top:10px">
+        <div class="tl-item"><div class="tl-dot" style="background:var(--brand)">1</div><div class="tl-body"><div class="tl-title">Today</div><div class="tl-sub">Foundation concreting C1-C6</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--green)">2</div><div class="tl-body"><div class="tl-title">Yesterday</div><div class="tl-sub">Rebar fixing — GF columns</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--muted)">3</div><div class="tl-body"><div class="tl-title">2 days ago</div><div class="tl-sub">Formwork striking — Basement</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--muted)">4</div><div class="tl-body"><div class="tl-title">3 days ago</div><div class="tl-sub">RCC column pour — Grid A</div></div></div>
+        <div class="tl-item"><div class="tl-dot" style="background:var(--muted)">5</div><div class="tl-body"><div class="tl-title">4 days ago</div><div class="tl-sub">Brickwork — External walls</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ EQUIPMENT ══════════════ -->
+<div class="page" id="page-equipment">
+  <div class="page-title"><i class="fas fa-truck"></i>Equipment & Plant</div>
+  <table class="tbl" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <thead><tr><th>Equipment</th><th>No.</th><th>Category</th><th>Ownership</th><th>Hire Rate/day</th><th>Last Service</th><th>Next Service</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Tower Crane TC-5013</strong></td><td>EQ-001</td><td>Crane</td><td><span class="badge badge-blue">Hired</span></td><td>₹8,000</td><td>28 May 2026</td><td>27 Jul 2026</td><td><span class="badge badge-green">Active</span></td></tr>
+      <tr><td><strong>Concrete Pump CP-36</strong></td><td>EQ-002</td><td>Pump</td><td><span class="badge badge-blue">Hired</span></td><td>₹12,000</td><td>14 Jun 2026</td><td>14 Jul 2026</td><td><span class="badge badge-green">Active</span></td></tr>
+      <tr><td><strong>Excavator JCB 3DX</strong></td><td>EQ-003</td><td>Excavator</td><td><span class="badge badge-green">Owned</span></td><td>—</td><td>01 Jun 2026</td><td>01 Aug 2026</td><td><span class="badge badge-yellow">Maintenance</span></td></tr>
+      <tr><td><strong>Generator DG 125kVA</strong></td><td>EQ-004</td><td>Generator</td><td><span class="badge badge-green">Owned</span></td><td>—</td><td>15 May 2026</td><td>15 Aug 2026</td><td><span class="badge badge-green">Active</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════ WORKERS ══════════════ -->
+<div class="page" id="page-workers">
+  <div class="page-title"><i class="fas fa-users"></i>Workers & Attendance</div>
+  <div class="grid grid-4" style="margin-bottom:16px">
+    <div class="card stat" style="color:var(--brand)"><div class="card-title">Total Workers</div><div class="stat-value">47</div><div class="stat-sub">On project</div></div>
+    <div class="card stat" style="color:var(--green)"><div class="card-title">Present Today</div><div class="stat-value">44</div><div class="stat-sub">93.6% attendance</div></div>
+    <div class="card stat" style="color:var(--orange)"><div class="card-title">Overtime Today</div><div class="stat-value">8</div><div class="stat-sub">workers</div></div>
+    <div class="card stat" style="color:var(--red)"><div class="card-title">Absent</div><div class="stat-value">3</div><div class="stat-sub">Prior approval</div></div>
+  </div>
+  <table class="tbl" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>OT</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>W001</td><td><strong>Rajesh Kumar</strong></td><td>Engineer</td><td>08:00</td><td>17:30</td><td>9.5h</td><td>1.5h</td><td><span class="badge badge-green">Present</span></td></tr>
+      <tr><td>W002</td><td><strong>Priya Sharma</strong></td><td>Architect</td><td>08:15</td><td>17:00</td><td>8.75h</td><td>0.75h</td><td><span class="badge badge-green">Present</span></td></tr>
+      <tr><td>W003</td><td><strong>Mohan Das</strong></td><td>Foreman</td><td>07:45</td><td>18:30</td><td>10.75h</td><td>2.75h</td><td><span class="badge badge-green">Present</span></td></tr>
+      <tr><td>W004</td><td><strong>Sunita Patel</strong></td><td>Safety Officer</td><td>08:00</td><td>17:00</td><td>9h</td><td>1h</td><td><span class="badge badge-green">Present</span></td></tr>
+      <tr><td>W005</td><td><strong>Vikram Singh</strong></td><td>Site Manager</td><td>07:30</td><td>18:00</td><td>10.5h</td><td>2.5h</td><td><span class="badge badge-green">Present</span></td></tr>
+      <tr><td>W006</td><td><strong>Anita Iyer</strong></td><td>Engineer</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-red">Absent</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════ QUALITY ══════════════ -->
+<div class="page" id="page-quality">
+  <div class="page-title"><i class="fas fa-microscope"></i>Quality Control</div>
+  <div class="grid grid-3" style="margin-bottom:16px">
+    <div class="card"><div class="card-title">Cube Test Results</div>
+      <table class="tbl" style="margin-top:8px"><thead><tr><th>Sample</th><th>Element</th><th>Grade</th><th>fck MPa</th><th>Result</th></tr></thead>
+      <tbody><tr><td>CUBE-001</td><td>Column C1-GF</td><td>M30</td><td>31.2</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>CUBE-002</td><td>Slab S1-GF</td><td>M25</td><td>26.5</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>CUBE-003</td><td>Beam B1-GF</td><td>M30</td><td>29.8</td><td><span class="badge badge-green">Pass</span></td></tr></tbody></table></div>
+    <div class="card"><div class="card-title">QC Inspections</div>
+      <table class="tbl" style="margin-top:8px"><thead><tr><th>No.</th><th>Type</th><th>Element</th><th>Result</th></tr></thead>
+      <tbody><tr><td>QCI-001</td><td>Rebar</td><td>Columns GF</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>QCI-002</td><td>Formwork</td><td>Slab 1F</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>QCI-003</td><td>Pre-pour</td><td>Slab 1F</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>QCI-004</td><td>Brickwork</td><td>Ext Wall</td><td><span class="badge badge-red">Fail</span></td></tr></tbody></table></div>
+    <div class="card"><div class="card-title">NCR — Non-Conformances</div>
+      <div style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><div style="font-weight:700;font-size:.9rem">NCR-001</div><div style="font-size:.8rem;color:var(--muted)">Brick masonry — incorrect bond</div></div>
+          <span class="badge badge-orange">Minor</span>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:6px">External Wall, Ground Floor · Raised: QC Engineer</div>
+        <div style="font-size:.78rem;margin-top:6px"><strong>Action:</strong> Demolish and rebuild with English bond</div>
+        <div style="margin-top:8px"><span class="badge badge-yellow">Open · Due in 5 days</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">QC Checklist — QCI-001 (Rebar Inspection, Columns GF)</div>
+    <table class="tbl" style="margin-top:10px"><thead><tr><th>#</th><th>Check Point</th><th>Reference</th><th>Requirement</th><th>Actual</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Bar dia and spacing correct</td><td>IS 456 Fig 5</td><td>As per drawing</td><td>Verified</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>2</td><td>Cover blocks in place</td><td>IS 456 Cl.26</td><td>Min 40mm clear</td><td>40–45mm</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>3</td><td>Laps and splices adequate</td><td>IS 456 Cl.26</td><td>Ld = 47d</td><td>50d provided</td><td><span class="badge badge-green">Pass</span></td></tr>
+      <tr><td>4</td><td>Formwork joints sealed</td><td>IS 456</td><td>No gaps</td><td>Sealed</td><td><span class="badge badge-green">Pass</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ══════════════ SAFETY ══════════════ -->
+<div class="page" id="page-safety">
+  <div class="page-title"><i class="fas fa-shield-alt"></i>HSE Safety</div>
+  <div class="grid grid-4" style="margin-bottom:16px">
+    <div class="card stat" style="color:var(--green)"><div class="card-title">LTI-Free Days</div><div class="stat-value">127</div><div class="stat-sub">0 Lost Time Injuries</div></div>
+    <div class="card stat" style="color:var(--orange)"><div class="card-title">Toolbox Talks</div><div class="stat-value">4</div><div class="stat-sub">This month</div></div>
+    <div class="card stat" style="color:var(--red)"><div class="card-title">Open Permits</div><div class="stat-value">2</div><div class="stat-sub">Height work + excavation</div></div>
+    <div class="card stat" style="color:var(--brand)"><div class="card-title">Risk Assessments</div><div class="stat-value">5</div><div class="stat-sub">All reviewed</div></div>
+  </div>
+  <div class="grid grid-2" style="margin-bottom:16px">
+    <div class="card">
+      <div class="card-title">Recent Toolbox Talks</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;font-size:.83rem">
+        <div style="padding:8px;background:var(--bg);border-radius:6px"><div style="font-weight:600">Working at Height — Fall Prevention</div><div style="color:var(--muted);font-size:.75rem">40 attendees · 20 min · Safety Officer</div></div>
+        <div style="padding:8px;background:var(--bg);border-radius:6px"><div style="font-weight:600">Concrete Pouring Safety</div><div style="color:var(--muted);font-size:.75rem">45 attendees · 20 min · Safety Officer</div></div>
+        <div style="padding:8px;background:var(--bg);border-radius:6px"><div style="font-weight:600">Crane Safety &amp; Exclusion Zones</div><div style="color:var(--muted);font-size:.75rem">38 attendees · 20 min · Safety Officer</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Risk Assessment Register</div>
+      <table class="tbl" style="margin-top:8px">
+        <thead><tr><th>Activity</th><th>Hazard</th><th>Score</th><th>Level</th></tr></thead>
+        <tbody>
+          <tr><td>Height Work</td><td>Fall from height</td><td>20</td><td><span class="badge badge-red">High</span></td></tr>
+          <tr><td>Concrete Pour</td><td>Formwork failure</td><td>15</td><td><span class="badge badge-red">High</span></td></tr>
+          <tr><td>Crane Ops</td><td>Load drop</td><td>10</td><td><span class="badge badge-yellow">Medium</span></td></tr>
+          <tr><td>Excavation</td><td>Cave-in</td><td>8</td><td><span class="badge badge-yellow">Medium</span></td></tr>
+          <tr><td>Electrical</td><td>Electrocution</td><td>8</td><td><span class="badge badge-yellow">Medium</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Permits to Work</div>
+    <table class="tbl" style="margin-top:8px"><thead><tr><th>Permit No.</th><th>Type</th><th>Title</th><th>Location</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>PTW-001</td><td>Height Work</td><td>Working at Height — Column L3</td><td>Columns A1-A6, Level 3</td><td><span class="badge badge-green">Approved</span></td></tr>
+      <tr><td>PTW-002</td><td>Hot Work</td><td>Welding — Column base plates</td><td>Basement, Grid C</td><td><span class="badge badge-gray">Closed</span></td></tr>
+      <tr><td>PTW-003</td><td>Excavation</td><td>External utility trench</td><td>North boundary</td><td><span class="badge badge-yellow">Pending</span></td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ══════════════ COMMERCIAL ══════════════ -->
+<div class="page" id="page-commercial">
+  <div class="page-title"><i class="fas fa-file-invoice-dollar"></i>Commercial &amp; BOQ</div>
+  <div class="grid grid-4" style="margin-bottom:16px">
+    <div class="card stat" style="color:var(--brand)"><div class="card-title">Contract Value</div><div class="stat-value">₹4.5Cr</div></div>
+    <div class="card stat" style="color:var(--green)"><div class="card-title">Billed to Date</div><div class="stat-value">₹1.2Cr</div></div>
+    <div class="card stat" style="color:var(--orange)"><div class="card-title">Received</div><div class="stat-value">₹0.9Cr</div></div>
+    <div class="card stat" style="color:var(--red)"><div class="card-title">Outstanding</div><div class="stat-value">₹0.3Cr</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Bill of Quantities — Civil Works (Extract)</div>
+    <table class="tbl" style="margin-top:10px"><thead><tr><th>Item</th><th>Description</th><th>Unit</th><th>Qty</th><th>Rate (₹)</th><th>Amount (₹)</th></tr></thead>
+    <tbody>
+      <tr><td>1.1</td><td>Earthwork in excavation for foundation</td><td>cum</td><td>420</td><td>280</td><td>1,17,600</td></tr>
+      <tr><td>1.2</td><td>PCC M10 — 75mm thick blinding</td><td>cum</td><td>28</td><td>4,800</td><td>1,34,400</td></tr>
+      <tr><td>1.3</td><td>RCC M30 — Raft foundation</td><td>cum</td><td>185</td><td>8,200</td><td>15,17,000</td></tr>
+      <tr><td>1.4</td><td>Tor Steel Fe415 in foundations</td><td>MT</td><td>28</td><td>68,000</td><td>19,04,000</td></tr>
+      <tr><td>2.1</td><td>RCC M30 — Columns GF</td><td>cum</td><td>22</td><td>9,500</td><td>2,09,000</td></tr>
+      <tr><td>2.2</td><td>RCC M25 — Slabs GF</td><td>cum</td><td>58</td><td>8,800</td><td>5,10,400</td></tr>
+      <tr style="font-weight:700;background:var(--brand-light)"><td colspan="5">Sub-Total (Civil)</td><td>44,92,400</td></tr>
+    </tbody></table>
+  </div>
+</div>
+
+<!-- ══════════════ INVOICES ══════════════ -->
+<div class="page" id="page-invoices">
+  <div class="page-title"><i class="fas fa-receipt"></i>Invoices</div>
+  <table class="tbl" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <thead><tr><th>Invoice No.</th><th>Client</th><th>Issue Date</th><th>Due Date</th><th>Amount</th><th>Tax</th><th>Total</th><th>Paid</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>INV-DEMO-0001</strong></td><td>Demo Holdings</td><td>13 Jun 2026</td><td>13 Jul 2026</td><td>₹50,00,000</td><td>₹9,00,000</td><td>₹59,00,000</td><td>₹0</td><td><span class="badge badge-blue">Sent</span></td></tr>
+      <tr><td><strong>INV-DEMO-0000</strong></td><td>Demo Holdings</td><td>01 Apr 2026</td><td>01 May 2026</td><td>₹30,00,000</td><td>₹5,40,000</td><td>₹35,40,000</td><td>₹35,40,000</td><td><span class="badge badge-green">Paid</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════ DOCUMENTS ══════════════ -->
+<div class="page" id="page-documents">
+  <div class="page-title"><i class="fas fa-folder"></i>Documents</div>
+  <table class="tbl" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+    <thead><tr><th>Title</th><th>Type</th><th>File</th><th>Version</th><th>Uploaded By</th><th>Approval</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Structural Design Report — Foundation</strong></td><td><span class="badge badge-blue">Design Report</span></td><td>STRUC-001-Rev0.pdf</td><td>1.0</td><td>Rajesh Kumar</td><td><span class="badge badge-green">Approved</span></td></tr>
+      <tr><td><strong>Architectural Drawing — GF Plan</strong></td><td><span class="badge badge-purple">Drawing</span></td><td>ARCH-GF-Rev2.dwg</td><td>1.0</td><td>Priya Sharma</td><td><span class="badge badge-green">Approved</span></td></tr>
+      <tr><td><strong>Structural Drawing — Column Layout</strong></td><td><span class="badge badge-purple">Drawing</span></td><td>STRUC-COL-Rev1.dwg</td><td>1.0</td><td>Rajesh Kumar</td><td><span class="badge badge-yellow">Pending</span></td></tr>
+      <tr><td><strong>IS 456 Concrete Mix Design M30</strong></td><td><span class="badge badge-blue">Test Report</span></td><td>MIXDES-M30-001.pdf</td><td>1.0</td><td>QC Engineer</td><td><span class="badge badge-green">Approved</span></td></tr>
+      <tr><td><strong>Safety Management Plan</strong></td><td><span class="badge badge-red">Safety Doc</span></td><td>SMP-Rev1.pdf</td><td>1.0</td><td>Safety Officer</td><td><span class="badge badge-green">Approved</span></td></tr>
+      <tr><td><strong>Project Quality Plan</strong></td><td><span class="badge badge-orange">Quality Plan</span></td><td>PQP-Rev0.pdf</td><td>1.0</td><td>QC Engineer</td><td><span class="badge badge-yellow">Pending</span></td></tr>
+      <tr><td><strong>BOQ — Civil Works</strong></td><td><span class="badge badge-green">Commercial</span></td><td>BOQ-Civil-Rev2.xlsx</td><td>1.0</td><td>Finance Mgr</td><td><span class="badge badge-green">Approved</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════ REPORTS ══════════════ -->
+<div class="page" id="page-reports">
+  <div class="page-title"><i class="fas fa-chart-bar"></i>Reports &amp; Analytics</div>
+  <div class="grid grid-3">
+    <div class="card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+      <div style="font-size:2rem;margin-bottom:8px;color:var(--brand)"><i class="fas fa-hard-hat"></i></div>
+      <div style="font-weight:700">Project Progress Report</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Gantt, milestones, EVM, S-curve</div>
+      <div style="margin-top:12px"><span class="badge badge-blue">PDF Export</span></div>
+    </div>
+    <div class="card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+      <div style="font-size:2rem;margin-bottom:8px;color:var(--green)"><i class="fas fa-shield-alt"></i></div>
+      <div style="font-weight:700">Monthly HSE Report</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Incidents, toolbox talks, PTWs, KPIs</div>
+      <div style="margin-top:12px"><span class="badge badge-blue">PDF Export</span></div>
+    </div>
+    <div class="card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+      <div style="font-size:2rem;margin-bottom:8px;color:var(--purple)"><i class="fas fa-microscope"></i></div>
+      <div style="font-weight:700">Quality Control Report</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Cube tests, inspections, NCR log</div>
+      <div style="margin-top:12px"><span class="badge badge-blue">PDF Export</span></div>
+    </div>
+    <div class="card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+      <div style="font-size:2rem;margin-bottom:8px;color:var(--accent)"><i class="fas fa-file-invoice-dollar"></i></div>
+      <div style="font-weight:700">Financial Report</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Budget vs actual, cash flow, BOQ</div>
+      <div style="margin-top:12px"><span class="badge badge-blue">PDF Export</span></div>
+    </div>
+    <div class="card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+      <div style="font-size:2rem;margin-bottom:8px;color:var(--red)"><i class="fas fa-users"></i></div>
+      <div style="font-weight:700">Labour Productivity Report</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">Attendance, overtime, manday analysis</div>
+      <div style="margin-top:12px"><span class="badge badge-blue">PDF Export</span></div>
+    </div>
+    <div class="card" style="cursor:pointer;transition:box-shadow .2s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.12)'" onmouseout="this.style.boxShadow=''">
+      <div style="font-size:2rem;margin-bottom:8px;color:var(--brand)"><i class="fas fa-drafting-compass"></i></div>
+      <div style="font-weight:700">Structural Calculation Report</div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">IS 456 / IS 800 design calculation PDFs</div>
+      <div style="margin-top:12px"><span class="badge badge-blue">PDF Export</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ── Navigation ────────────────────────────────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const p = document.getElementById('page-' + id);
+  if (p) p.classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// ── BIM interactions ──────────────────────────────────────────────────
+function selectElement(el, name, mat, size) {
+  document.getElementById('bim-detail').innerHTML = `
+    <div style="font-weight:700;margin-bottom:8px">${name}</div>
+    <div style="font-size:.82rem;display:flex;flex-direction:column;gap:6px">
+      <div><span style="color:var(--muted)">Material:</span> ${mat}</div>
+      <div><span style="color:var(--muted)">Size:</span> ${size}</div>
+      <div><span style="color:var(--muted)">Design Code:</span> IS 456:2000</div>
+      <div><span style="color:var(--muted)">Status:</span> <span class="badge badge-green">Complete</span></div>
+    </div>`;
+}
+function selectFloor(el, name) {
+  document.querySelectorAll('.bim-floor').forEach(f => f.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('bim-detail').innerHTML = `
+    <div style="font-weight:700;margin-bottom:8px">${name}</div>
+    <div style="font-size:.82rem;display:flex;flex-direction:column;gap:6px">
+      <div><span style="color:var(--muted)">Type:</span> Slab 150mm</div>
+      <div><span style="color:var(--muted)">Material:</span> Concrete M30</div>
+      <div><span style="color:var(--muted)">Area:</span> 96 m²</div>
+      <div><span style="color:var(--muted)">Volume:</span> 14.4 m³</div>
+      <div><span style="color:var(--muted)">Design Code:</span> IS 456:2000</div>
+      <div><span style="color:var(--muted)">Status:</span> <span class="badge badge-green">Complete</span></div>
+    </div>`;
+}
+
+// ── Expense Chart ─────────────────────────────────────────────────────
+(function buildChart() {
+  const data = [
+    {m:'Jan',v:8},  {m:'Feb',v:12}, {m:'Mar',v:18},
+    {m:'Apr',v:25}, {m:'May',v:22}, {m:'Jun',v:35},
+  ];
+  const max = Math.max(...data.map(d => d.v));
+  const el = document.getElementById('expense-chart');
+  if (!el) return;
+  el.innerHTML = data.map(d => `
+    <div class="chart-bar-wrap">
+      <div class="chart-val">₹${d.v}L</div>
+      <div class="chart-bar" style="height:${(d.v/max*90)+10}px;background:var(--brand);opacity:${.5 + .5*d.v/max}"></div>
+      <div class="chart-label">${d.m}</div>
+    </div>`).join('');
+})();
+
+// ── Scheduling data ───────────────────────────────────────────────────
+(function buildGantt() {
+  const rows = [
+    ["Mobilization",          "15 days", "01 Mar","15 Mar",  "0",  "done"],
+    ["Soil Investigation",    "20 days", "05 Mar","25 Mar",  "0",  "done"],
+    ["Foundation Design",     "30 days", "20 Mar","19 Apr",  "0",  "done"],
+    ["Foundation Excavation", "25 days", "01 Apr","26 Apr",  "5",  "done"],
+    ["PCC & Raft Concreting", "20 days", "20 Apr","10 May",  "0",  "done"],
+    ["GF Columns & Beams",    "35 days", "05 May","09 Jun",  "0",  "in_progress"],
+    ["GF Slab",               "15 days", "10 Jun","25 Jun",  "0",  "in_progress"],
+    ["1F Structure",          "35 days", "20 Jun","25 Jul",  "0",  "todo"],
+    ["2F-7F Structure (Typ)", "120 days","20 Jul","17 Nov",  "0",  "todo"],
+    ["Finishes",              "90 days", "01 Oct","29 Dec",  "10", "todo"],
+  ];
+  const body = document.getElementById('gantt-body');
+  if (!body) return;
+  body.innerHTML = rows.map(([act,dur,start,finish,fl,status]) => {
+    const badge = status === 'done' ? 'badge-green' : status === 'in_progress' ? 'badge-blue' : 'badge-gray';
+    const label = status === 'done' ? 'Done' : status === 'in_progress' ? 'In Progress' : 'Pending';
+    const pct = status === 'done' ? 100 : status === 'in_progress' ? Math.floor(Math.random()*40+30) : 0;
+    return `<tr>
+      <td><strong>${act}</strong></td><td>${dur}</td><td>${start}</td><td>${finish}</td>
+      <td>${fl} days</td>
+      <td><span class="badge ${badge}">${label}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">
+        <div class="pbar" style="flex:1;margin:0"><div class="pbar-fill" style="width:${pct}%;background:var(--brand)"></div></div>
+        <span style="font-size:.75rem;min-width:28px">${pct}%</span></div></td>
+    </tr>`;
+  }).join('');
+})();
+
+// ── Today date ────────────────────────────────────────────────────────
+document.getElementById('today-date').textContent =
+  new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+</script>
+</body>
+</html>

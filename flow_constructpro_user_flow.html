@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, sans-serif; background: var(--bg-base, #0f172a); color: var(--text-primary, #f1f5f9); }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+  h1 { text-align: center; font-size: 1.3rem; color: #93c5fd; margin-bottom: 4px; letter-spacing: .5px; }
+  .subtitle { text-align: center; font-size: .78rem; color: #64748b; margin-bottom: 24px; }
+
+  /* Tab bar */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+  .tab { padding: 6px 14px; border-radius: 20px; font-size: .75rem; font-weight: 600; cursor: pointer;
+         border: 1px solid #334155; color: #94a3b8; background: #1e293b; transition: all .2s; }
+  .tab.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .tab:hover:not(.active) { border-color: #64748b; color: #e2e8f0; }
+
+  /* Flow panels */
+  .flow-panel { display: none; }
+  .flow-panel.active { display: block; }
+
+  /* Step card */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step-row { display: flex; align-items: flex-start; gap: 0; }
+
+  /* Connector line */
+  .step-connector { display: flex; flex-direction: column; align-items: center; width: 40px; flex-shrink: 0; }
+  .step-dot { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+              font-size: .85rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .step-line { width: 2px; flex: 1; min-height: 20px; margin: 4px 0; }
+
+  .step-card { flex: 1; background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+               padding: 12px 16px; margin-bottom: 12px; cursor: pointer; transition: all .2s; }
+  .step-card:hover { border-color: #475569; background: #263347; }
+  .step-card.expanded { border-color: var(--accent, #2563eb); }
+
+  .step-header { display: flex; align-items: center; gap: 10px; }
+  .step-icon { font-size: 1.1rem; }
+  .step-title { font-size: .9rem; font-weight: 600; color: #e2e8f0; }
+  .step-tag { font-size: .65rem; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+              margin-left: auto; white-space: nowrap; }
+  .step-detail { margin-top: 10px; padding-top: 10px; border-top: 1px solid #334155; display: none; }
+  .step-card.expanded .step-detail { display: block; }
+
+  .step-desc { font-size: .8rem; color: #94a3b8; margin-bottom: 8px; line-height: 1.5; }
+  .step-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .action-pill { font-size: .7rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px;
+                 padding: 3px 10px; color: #cbd5e1; }
+
+  /* Color themes per flow */
+  .c-saas   { --accent:#7c3aed; }
+  .c-setup  { --accent:#2563eb; }
+  .c-proj   { --accent:#16a34a; }
+  .c-eng    { --accent:#ea580c; }
+  .c-site   { --accent:#0891b2; }
+  .c-report { --accent:#dc2626; }
+
+  /* Legend */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
+  .legend-item { font-size: .7rem; display: flex; align-items: center; gap: 5px; color: #94a3b8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Role badges */
+  .role-saas   { background: #4c1d95; color: #c4b5fd; }
+  .role-admin  { background: #1e3a8a; color: #93c5fd; }
+  .role-pm     { background: #14532d; color: #86efac; }
+  .role-eng    { background: #7c2d12; color: #fdba74; }
+  .role-site   { background: #164e63; color: #67e8f9; }
+  .role-fin    { background: #713f12; color: #fcd34d; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🏗 NagaForge — User Flow Guide</h1>
+  <p class="subtitle">Click any step to expand details · Select a role-based journey below</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showFlow('all')">Full Journey</div>
+    <div class="tab" onclick="showFlow('saas')">SaaS Admin</div>
+    <div class="tab" onclick="showFlow('setup')">Company Setup</div>
+    <div class="tab" onclick="showFlow('proj')">Project Manager</div>
+    <div class="tab" onclick="showFlow('eng')">Engineer</div>
+    <div class="tab" onclick="showFlow('site')">Site Ops</div>
+    <div class="tab" onclick="showFlow('report')">Reports & Finance</div>
+  </div>
+
+  <div id="flow-container"></div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>SaaS Admin</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#2563eb"></div>Company Admin</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#16a34a"></div>Project Manager</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ea580c"></div>Engineer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div>Site Team</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#dc2626"></div>Finance / Reports</div>
+  </div>
+</div>
+
+<script>
+const FLOWS = {
+  all: [
+    { id:1, icon:"🌐", title:"Create Tenant (Company)", role:"SaaS Admin", roleClass:"role-saas", dotColor:"#7c3aed", lineColor:"#7c3aed",
+      desc:"Log in as the platform super-admin. Go to SaaS → Tenant Management → Add Company. Fill company name, country, subscription plan (Starter / Professional / Enterprise). The company gets its own isolated data space.",
+      actions:["SaaS → Tenants","Pick plan","Set currency & timezone","Save → Tenant ID created"] },
+    { id:2, icon:"👤", title:"Onboard Admin User", role:"SaaS Admin", roleClass:"role-saas", dotColor:"#7c3aed", lineColor:"#7c3aed",
+      desc:"Still in SaaS panel, create the first admin user for the new company. Set username, password, role = 'admin'. This user logs in and manages everything for their company.",
+      actions:["SaaS → Users → Add User","role = admin","company = new tenant","Give credentials to client"] },
+    { id:3, icon:"🏢", title:"Company Setup & Branding", role:"Company Admin", roleClass:"role-admin", dotColor:"#2563eb", lineColor:"#2563eb",
+      desc:"Admin logs in. Goes to Company Settings → configure GST, address, logo color (white-label). The app name & primary color change instantly for all users of that tenant.",
+      actions:["Company → Settings","Set brand color","Set timezone & currency","Enable modules"] },
+    { id:4, icon:"👥", title:"Add Team Members", role:"Company Admin", roleClass:"role-admin", dotColor:"#2563eb", lineColor:"#2563eb",
+      desc:"Add workers/engineers: Workers module → Add Worker. Set role (engineer, foreman, safety officer), daily rate, contact. These can later be assigned to projects and tasks.",
+      actions:["Workers → Add Worker","Set role & rate","Assign to company","Optional: create login user"] },
+    { id:5, icon:"🤝", title:"Add Clients", role:"Company Admin", roleClass:"role-admin", dotColor:"#2563eb", lineColor:"#16a34a",
+      desc:"Finance → Clients → Add Client. Link client to company, city, country, contact. Clients are tied to projects and invoices.",
+      actions:["Finance → Clients","Fill name, company, contact","Save client record"] },
+    { id:6, icon:"📁", title:"Create Project", role:"Project Manager", roleClass:"role-pm", dotColor:"#16a34a", lineColor:"#16a34a",
+      desc:"Projects → Add Project. Enter project name, code, type (residential/commercial/infrastructure), start/end date, total budget, client, location. This is the central hub — everything else links to a project.",
+      actions:["Projects → + New","Set budget & timeline","Link client","Choose project type","Save → PRJ-XXXX created"] },
+    { id:7, icon:"🗓", title:"Schedule Tasks", role:"Project Manager", roleClass:"role-pm", dotColor:"#16a34a", lineColor:"#16a34a",
+      desc:"Inside the project, open Scheduling tab. Create tasks with title, priority (low/medium/high/urgent), due date, assigned worker. Track status: todo → in_progress → done.",
+      actions:["Project → Scheduling","Add tasks with due dates","Assign to worker","Update status daily"] },
+    { id:8, icon:"💰", title:"Log Expenses", role:"Project Manager", roleClass:"role-pm", dotColor:"#16a34a", lineColor:"#dc2626",
+      desc:"Finance → Expenses → Add. Link expense to project, set category (material/labor/equipment/subcontract), amount, vendor, date. Tracks budget vs actual spend in real time.",
+      actions:["Finance → Expenses → +","Select project","Choose category","Enter vendor & amount"] },
+    { id:9, icon:"📐", title:"Structural Design Calcs", role:"Engineer", roleClass:"role-eng", dotColor:"#ea580c", lineColor:"#ea580c",
+      desc:"Structural Engineering module → 5 sub-modules: Steel Beam Design (IS 800), Column Design, Weld Design, Bolt Group, Auto Member Selector. Enter loads and geometry → get pass/fail verdict with utilization ratios. Download PDF calc sheet.",
+      actions:["Structural → Steel Design","Input span, loads, section","Click Calculate","Check utilisation ratio","Download PDF report"] },
+    { id:10, icon:"🧱", title:"IS 456 Concrete Design", role:"Engineer", roleClass:"role-eng", dotColor:"#ea580c", lineColor:"#ea580c",
+      desc:"Structural → IS 456 tab: Singly/Doubly reinforced beam design, Column interaction diagrams, Slab design (one-way/two-way), Footing. Outputs Ast required, check vs provided, generate PDF.",
+      actions:["Structural → IS 456","Pick element type","Enter fck, fy, dimensions","Get Ast & checks","PDF calc sheet"] },
+    { id:11, icon:"🏗", title:"BIM Model Viewer", role:"Engineer", roleClass:"role-eng", dotColor:"#ea580c", lineColor:"#0891b2",
+      desc:"BIM module → Upload IFC/DWG model → 3D viewer renders the model. Add markups and issues directly on the model. Link BIM issues to safety or quality reports.",
+      actions:["BIM → Upload Model","View in 3D","Add markup","Link to QC / Safety","Export issue list"] },
+    { id:12, icon:"📦", title:"Manage Inventory", role:"Site Team", roleClass:"role-site", dotColor:"#0891b2", lineColor:"#0891b2",
+      desc:"Inventory module → Add materials (cement bags, TMT bars, aggregates). Track stock levels. Low stock alerts when quantity falls below minimum. Record receipts and consumption per project.",
+      actions:["Inventory → + Item","Set min quantity","Record GRN (receipt)","Log consumption","Get low-stock alerts"] },
+    { id:13, icon:"🧪", title:"Quality Control — Cube Tests", role:"Site Team", roleClass:"role-site", dotColor:"#0891b2", lineColor:"#0891b2",
+      desc:"Quality → Material Tests → Cube Test. Enter fck grade, 7-day and 28-day strengths for each cube set. System auto-checks IS 516 compliance (mean ≥ fck+4, individual ≥ fck-4). Red/green verdict. Download QC PDF.",
+      actions:["Quality → Cube Test","Enter cube strengths","IS 516 auto-check","Green = Pass, Red = Fail","Download PDF report"] },
+    { id:14, icon:"⚠️", title:"Safety — Log Incidents", role:"Site Team", roleClass:"role-site", dotColor:"#0891b2", lineColor:"#0891b2",
+      desc:"Safety module → Log Incident. Set type (near miss / incident / unsafe act), severity (low/medium/high/critical), project, location, corrective action, photos. Manage toolbox talks and HSE KPIs.",
+      actions:["Safety → + Incident","Set severity & type","Link to project","Add corrective action","Download incident PDF"] },
+    { id:15, icon:"📋", title:"Site Diary & Attendance", role:"Site Team", roleClass:"role-site", dotColor:"#0891b2", lineColor:"#dc2626",
+      desc:"Site Ops → Site Diary: log daily work done, weather, workers on site, machinery. Attendance: mark present/absent per worker per day. Records sync offline and upload when connection returns.",
+      actions:["Site Ops → Site Diary","Log daily progress","Attendance → Mark present","Offline works on mobile"] },
+    { id:16, icon:"🧾", title:"Create & Send Invoice", role:"Finance", roleClass:"role-fin", dotColor:"#dc2626", lineColor:"#dc2626",
+      desc:"Finance → Invoices → New Invoice. Select client and project. Add line items. GST calculated automatically. Set status (draft → sent → paid). Download professional PDF invoice.",
+      actions:["Finance → Invoices → +","Link client & project","Add line items","Apply GST","Download / email PDF"] },
+    { id:17, icon:"📊", title:"Dashboard & Analytics", role:"Project Manager", roleClass:"role-pm", dotColor:"#2563eb", lineColor:"#2563eb",
+      desc:"Dashboard shows live KPIs: total projects, budget utilisation %, active workers, open safety incidents, pending tasks, project health bars. EVM: Planned Value vs Earned Value vs Actual Cost. Drill down by project.",
+      actions:["Dashboard (default)","Check project health","EVM chart: PV vs EV vs AC","Budget burn rate","Export progress PDF"] },
+    { id:18, icon:"📱", title:"Mobile — Install PWA", role:"All Roles", roleClass:"role-admin", dotColor:"#475569", lineColor:"#475569",
+      desc:"Open the app URL in Safari → tap Share → Add to Home Screen → NagaForge icon appears. Runs as a standalone app. Offline mode shows cached data. Bottom nav: Home / Projects / Safety / Site / Design.",
+      actions:["Safari → Share → Add to Home Screen","Offline mode auto-activates","Bottom nav for quick access","Push notifications (if enabled)"] },
+  ],
+};
+
+// Filter views
+FLOWS.saas   = FLOWS.all.slice(0, 2);
+FLOWS.setup  = FLOWS.all.slice(2, 5);
+FLOWS.proj   = [FLOWS.all[5], FLOWS.all[6], FLOWS.all[7], FLOWS.all[16], FLOWS.all[17]];
+FLOWS.eng    = [FLOWS.all[8], FLOWS.all[9], FLOWS.all[10]];
+FLOWS.site   = [FLOWS.all[11], FLOWS.all[12], FLOWS.all[13], FLOWS.all[14]];
+FLOWS.report = [FLOWS.all[7], FLOWS.all[15], FLOWS.all[17]];
+
+function showFlow(key) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderFlow(FLOWS[key] || FLOWS.all);
+}
+
+function renderFlow(steps) {
+  const container = document.getElementById('flow-container');
+  container.innerHTML = steps.map((s, i) => `
+    <div class="step-row">
+      <div class="step-connector">
+        <div class="step-dot" style="background:${s.dotColor}20;color:${s.dotColor};border:2px solid ${s.dotColor}">${s.id}</div>
+        ${i < steps.length - 1 ? `<div class="step-line" style="background:linear-gradient(${s.lineColor},${steps[i+1].dotColor})"></div>` : ''}
+      </div>
+      <div class="step-card" onclick="toggle(this)" style="--accent:${s.dotColor}">
+        <div class="step-header">
+          <span class="step-icon">${s.icon}</span>
+          <span class="step-title">${s.title}</span>
+          <span class="step-tag ${s.roleClass}">${s.role}</span>
+        </div>
+        <div class="step-detail">
+          <p class="step-desc">${s.desc}</p>
+          <div class="step-actions">${s.actions.map(a => `<span class="action-pill">→ ${a}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggle(card) {
+  card.classList.toggle('expanded');
+}
+
+renderFlow(FLOWS.all);
+</script>
+</body>
+</html>

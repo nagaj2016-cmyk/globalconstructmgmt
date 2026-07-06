@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NagaForge — Construction ERP & Structural Engineering Platform</title>
+<meta name="description" content="The complete platform for structural engineers and construction teams. NBC, IS, ASCE, Eurocode calculations. Project management, BIM, QC, Safety — all in one."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0f2044;
+  --navy-mid:#1a3460;
+  --blue:#2563eb;
+  --blue-light:#3b82f6;
+  --blue-pale:#eff6ff;
+  --green:#059669;
+  --green-pale:#ecfdf5;
+  --text:#0f172a;
+  --text-mid:#334155;
+  --text-muted:#64748b;
+  --border:#e2e8f0;
+  --bg:#ffffff;
+  --bg-soft:#f8fafc;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.06);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ── NAV ─────────────────────────────────────────────────── */
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;gap:32px}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.nav-logo-icon{width:36px;height:36px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.nav-logo-text{font-size:17px;font-weight:800;color:var(--navy);letter-spacing:-.3px}
+.nav-logo-text span{color:var(--blue)}
+.nav-links{display:flex;gap:4px;align-items:center}
+.nav-links a{text-decoration:none;color:var(--text-mid);font-size:14px;font-weight:500;padding:6px 12px;border-radius:7px;transition:all .15s}
+.nav-links a:hover{color:var(--navy);background:var(--bg-soft)}
+.nav-cta{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:all .18s;border:none}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-mid)}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-pale)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 4px rgba(37,99,235,.3)}
+.btn-primary:hover{background:#1d4ed8;box-shadow:0 4px 16px rgba(37,99,235,.35);transform:translateY(-1px)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-navy:hover{background:var(--navy-mid);transform:translateY(-1px)}
+.btn-lg{padding:13px 28px;font-size:15px;border-radius:10px}
+.btn-xl{padding:15px 32px;font-size:16px;border-radius:11px}
+
+/* ── HERO ─────────────────────────────────────────────────── */
+.hero{padding:96px 24px 80px;max-width:1200px;margin:0 auto;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--blue-pale);border:1px solid #bfdbfe;color:var(--blue);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:24px}
+.hero-badge-dot{width:6px;height:6px;background:var(--blue);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+h1{font-size:clamp(40px,6vw,68px);font-weight:900;line-height:1.08;letter-spacing:-2px;color:var(--navy);margin-bottom:20px}
+h1 .accent{color:var(--blue)}
+.hero-sub{font-size:clamp(16px,2vw,20px);color:var(--text-muted);max-width:640px;margin:0 auto 36px;font-weight:400;line-height:1.6}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:56px}
+.hero-note{font-size:12px;color:var(--text-muted);margin-top:8px}
+
+/* App preview */
+.hero-preview{max-width:1000px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(15,32,68,.15),0 0 0 1px rgba(0,0,0,.06);background:var(--bg-soft)}
+.preview-bar{background:var(--navy);padding:10px 16px;display:flex;align-items:center;gap:8px}
+.preview-dots{display:flex;gap:6px}
+.preview-dot{width:11px;height:11px;border-radius:50%}
+.preview-url{background:rgba(255,255,255,.12);flex:1;max-width:340px;margin:0 auto;border-radius:5px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.6);text-align:center;font-family:monospace}
+.preview-body{display:grid;grid-template-columns:200px 1fr;min-height:400px}
+.preview-sidebar{background:#0f2044;padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.preview-brand{display:flex;align-items:center;gap:8px;padding:8px;margin-bottom:8px}
+.preview-brand-icon{width:28px;height:28px;background:var(--blue);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff}
+.preview-brand-name{font-size:12px;font-weight:700;color:#fff}
+.ps{font-size:9px;color:rgba(255,255,255,.35);font-weight:600;text-transform:uppercase;letter-spacing:1px;padding:8px 8px 2px}
+.pi{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;font-size:11px;color:rgba(255,255,255,.55);cursor:default}
+.pi.act{background:#2563eb;color:#fff}
+.pi i{font-size:11px;width:14px;text-align:center}
+.preview-main{background:#f8fafc;padding:20px}
+.pm-header{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px}
+.pm-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.pm-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px}
+.pm-card-val{font-size:20px;font-weight:800;color:var(--navy)}
+.pm-card-lbl{font-size:10px;color:var(--text-muted);margin-top:2px}
+.pm-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pm-box{background:#fff;border:1px solid var(--border);border-radius:8px;padding:12px}
+.pm-box-title{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.pm-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:11px}
+.pm-prog{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-bottom:8px}
+.pm-prog-fill{height:100%;border-radius:3px}
+.pm-pill{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
+.pill-g{background:#dcfce7;color:#166534}
+.pill-y{background:#fef9c3;color:#854d0e}
+.pill-b{background:#dbeafe;color:#1e40af}
+
+/* ── TRUST BAR ────────────────────────────────────────────── */
+.trust-bar{background:var(--bg-soft);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 24px}
+.trust-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:13px;font-weight:500}
+.trust-item i{color:var(--blue);font-size:14px}
+.trust-divider{width:1px;height:20px;background:var(--border)}
+
+/* ── SECTIONS ─────────────────────────────────────────────── */
+section{padding:80px 24px}
+.section-inner{max-width:1200px;margin:0 auto}
+.section-tag{display:inline-block;background:var(--blue-pale);color:var(--blue);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:14px}
+.section-title{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;color:var(--navy);margin-bottom:14px;line-height:1.15}
+.section-sub{font-size:17px;color:var(--text-muted);max-width:580px;line-height:1.65}
+.centered{text-align:center}
+.centered .section-sub{margin:0 auto}
+
+/* ── PROBLEM ──────────────────────────────────────────────── */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-top:48px}
+.problem-visual{background:var(--bg-soft);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative}
+.excel-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+.excel-row:last-child{border-bottom:none}
+.excel-icon{width:32px;height:32px;background:#217346;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
+.excel-name{flex:1;color:var(--text-mid);font-weight:500}
+.excel-age{font-size:11px;color:var(--text-muted)}
+.excel-warn{font-size:10px;color:#ef4444;font-weight:600}
+.excel-header{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border);border-radius:8px 8px 0 0}
+.problem-points{display:flex;flex-direction:column;gap:20px}
+.problem-point{display:flex;gap:16px;align-items:flex-start}
+.problem-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.problem-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.problem-desc{font-size:14px;color:var(--text-muted);line-height:1.6}
+
+/* ── FEATURES ─────────────────────────────────────────────── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.feature-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:24px;transition:all .2s}
+.feature-card:hover{box-shadow:var(--shadow-lg);border-color:#bfdbfe;transform:translateY(-2px)}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.feature-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.feature-desc{font-size:14px;color:var(--text-muted);line-height:1.6}
+.feature-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.ftag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;background:var(--bg-soft);color:var(--text-muted);border:1px solid var(--border)}
+
+/* ── CODES ────────────────────────────────────────────────── */
+.codes-section{background:var(--navy);color:#fff}
+.codes-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:40px}
+.code-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:24px;transition:all .2s}
+.code-card:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.code-flag{font-size:28px;margin-bottom:12px}
+.code-country{font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.code-name{font-size:18px;font-weight:800;color:#fff;margin-bottom:12px}
+.code-list{list-style:none;display:flex;flex-direction:column;gap:5px}
+.code-list li{font-size:12px;color:rgba(255,255,255,.65);display:flex;align-items:center;gap:6px}
+.code-list li::before{content:"→";color:#60a5fa;font-size:10px}
+.code-new{display:inline-block;background:#2563eb;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+
+/* ── MODULES TABS ─────────────────────────────────────────── */
+.modules-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;border-bottom:2px solid var(--border);padding-bottom:0}
+.mod-tab{padding:10px 18px;font-size:13px;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;border-radius:6px 6px 0 0}
+.mod-tab:hover{color:var(--navy)}
+.mod-tab.active{color:var(--blue);border-bottom-color:var(--blue);background:var(--blue-pale)}
+.module-content{display:none;animation:fadeIn .25s ease}
+.module-content.active{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.mod-screen{background:var(--bg-soft);border:1px solid var(--border);border-radius:14px;padding:20px;min-height:280px}
+.mod-info h3{font-size:24px;font-weight:800;color:var(--navy);margin-bottom:10px;letter-spacing:-.5px}
+.mod-info p{font-size:15px;color:var(--text-muted);line-height:1.65;margin-bottom:20px}
+.mod-bullets{list-style:none;display:flex;flex-direction:column;gap:8px}
+.mod-bullets li{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text-mid)}
+.mod-bullets li i{color:var(--green);font-size:12px;flex-shrink:0}
+.mod-link{display:inline-flex;align-items:center;gap:6px;color:var(--blue);font-size:13px;font-weight:600;text-decoration:none;margin-top:16px}
+.mod-link:hover{color:#1d4ed8}
+
+/* mini table */
+.mini-t{width:100%;font-size:11px;border-collapse:collapse}
+.mini-t th{background:var(--bg);border-bottom:1px solid var(--border);padding:7px 10px;text-align:left;font-weight:700;color:var(--text-muted);text-transform:uppercase;font-size:9px;letter-spacing:.5px}
+.mini-t td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text-mid)}
+.mini-t tr:last-child td{border-bottom:none}
+.tag{display:inline-block;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}
+.tag-g{background:#dcfce7;color:#166534}
+.tag-r{background:#fee2e2;color:#991b1b}
+.tag-y{background:#fef9c3;color:#854d0e}
+.tag-b{background:#dbeafe;color:#1e40af}
+.calc-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px}
+.calc-row:last-child{border-bottom:none}
+.calc-key{color:var(--text-muted)}
+.calc-val{font-weight:700;color:var(--navy)}
+.calc-pass{color:var(--green);font-weight:800;font-size:13px}
+
+/* ── PRICING ──────────────────────────────────────────────── */
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;align-items:start}
+.price-card{background:var(--bg);border:1.5px solid var(--border);border-radius:16px;padding:28px;position:relative}
+.price-card.featured{border-color:var(--blue);box-shadow:0 0 0 4px rgba(37,99,235,.08)}
+.price-popular{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:10px;font-weight:800;padding:4px 14px;border-radius:12px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.price-name{font-size:14px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.price-val{font-size:38px;font-weight:900;color:var(--navy);letter-spacing:-1.5px;margin-bottom:2px}
+.price-val sup{font-size:18px;font-weight:700;vertical-align:top;margin-top:8px}
+.price-period{font-size:12px;color:var(--text-muted);margin-bottom:20px}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:24px;padding-top:16px;border-top:1px solid var(--border)}
+.price-features li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid)}
+.price-features li i{color:var(--green);font-size:11px;flex-shrink:0}
+.price-features li.off{color:#94a3b8}
+.price-features li.off i{color:#cbd5e1}
+
+/* ── STATS ────────────────────────────────────────────────── */
+.stats-band{background:var(--navy);padding:60px 24px}
+.stats-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+.stat-val{font-size:42px;font-weight:900;color:#fff;letter-spacing:-1.5px;margin-bottom:4px}
+.stat-val span{color:#60a5fa}
+.stat-label{font-size:13px;color:rgba(255,255,255,.55);font-weight:500}
+
+/* ── CTA FINAL ────────────────────────────────────────────── */
+.cta-section{background:linear-gradient(135deg,var(--navy) 0%,#1e3a8a 100%);padding:96px 24px;text-align:center;color:#fff}
+.cta-title{font-size:clamp(30px,5vw,52px);font-weight:900;letter-spacing:-1.5px;margin-bottom:16px;color:#fff}
+.cta-sub{font-size:18px;color:rgba(255,255,255,.65);max-width:560px;margin:0 auto 36px;line-height:1.6}
+.cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-white{background:#fff;color:var(--navy)}
+.btn-white:hover{background:#f0f9ff;transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.3)}
+.btn-ghost:hover{background:rgba(255,255,255,.18)}
+
+/* ── FOOTER ───────────────────────────────────────────────── */
+footer{background:var(--text);padding:48px 24px 28px;color:rgba(255,255,255,.6)}
+.footer-inner{max-width:1200px;margin:0 auto}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.footer-brand-icon{width:32px;height:32px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.footer-brand-name{font-size:16px;font-weight:800;color:#fff}
+.footer-desc{font-size:13px;line-height:1.7;color:rgba(255,255,255,.45);max-width:260px}
+.footer-col h4{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.footer-col a{display:block;font-size:13px;color:rgba(255,255,255,.45);text-decoration:none;margin-bottom:8px;transition:color .15s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;font-size:12px}
+.footer-codes{display:flex;gap:8px;flex-wrap:wrap}
+.fcode{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.45);font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px}
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media(max-width:900px){
+  .features-grid,.codes-grid,.pricing-grid{grid-template-columns:1fr 1fr}
+  .problem-grid,.module-content.active{grid-template-columns:1fr}
+  .stats-inner{grid-template-columns:1fr 1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+  .preview-body{grid-template-columns:1fr}
+  .preview-sidebar{display:none}
+}
+@media(max-width:600px){
+  .features-grid,.codes-grid,.pricing-grid{grid-template-columns:1fr}
+  .hero-actions{flex-direction:column;align-items:center}
+  .stats-inner{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     NAV
+══════════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-icon"><i class="fas fa-building-columns"></i></div>
+      <div class="nav-logo-text">Naga<span>Forge</span></div>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#codes">Codes</a>
+      <a href="#modules">Modules</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="nav-cta">
+      <a href="/app?entry=landing#login" class="btn btn-outline">Sign In</a>
+      <a href="/app?entry=landing#signup" class="btn btn-primary"><i class="fas fa-rocket"></i> Get Started Free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section style="padding:80px 24px 60px">
+  <div class="hero" style="padding:0">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      Now supporting NBC 2025 · IS 456 · ASCE 7 · Eurocode
+    </div>
+    <h1>Engineering software<br>built for the job site</h1>
+    <p class="hero-sub">Structural calculations, project management, quality control, and site operations — unified in one professional platform built for modern construction teams.</p>
+    <div class="hero-actions">
+      <a href="/app?entry=landing#signup" class="btn btn-primary btn-xl"><i class="fas fa-rocket"></i> Start for Free</a>
+      <a href="/linkedin" class="btn btn-outline btn-xl" target="_blank"><i class="fas fa-play-circle"></i> Watch Demo</a>
+    </div>
+    <p class="hero-note">No credit card required · 30-day free trial · Cancel anytime</p>
+
+    <!-- App preview mockup -->
+    <div class="hero-preview" style="margin-top:52px">
+      <div class="preview-bar">
+        <div class="preview-dots">
+          <div class="preview-dot" style="background:#ff5f57"></div>
+          <div class="preview-dot" style="background:#febc2e"></div>
+          <div class="preview-dot" style="background:#28c840"></div>
+        </div>
+        <div class="preview-url">nagaforge.app/dashboard</div>
+      </div>
+      <div class="preview-body">
+        <div class="preview-sidebar">
+          <div class="preview-brand">
+            <div class="preview-brand-icon"><i class="fas fa-building-columns"></i></div>
+            <div class="preview-brand-name">NagaForge</div>
+          </div>
+          <div class="ps">Overview</div>
+          <div class="pi act"><i class="fas fa-gauge-high"></i> Dashboard</div>
+          <div class="ps">Operations</div>
+          <div class="pi"><i class="fas fa-diagram-project"></i> Projects</div>
+          <div class="pi"><i class="fas fa-chart-gantt"></i> Scheduling</div>
+          <div class="ps">Engineering</div>
+          <div class="pi"><i class="fas fa-drafting-compass"></i> IS Structural</div>
+          <div class="pi"><i class="fas fa-cube"></i> BIM Viewer</div>
+          <div class="ps">Site</div>
+          <div class="pi"><i class="fas fa-hard-hat"></i> Site Operations</div>
+          <div class="pi"><i class="fas fa-clipboard-check"></i> Quality Control</div>
+          <div class="pi"><i class="fas fa-triangle-exclamation"></i> Safety & HSE</div>
+        </div>
+        <div class="preview-main">
+          <div class="pm-header">Good morning — Dashboard</div>
+          <div class="pm-cards">
+            <div class="pm-card"><div class="pm-card-val" style="color:#2563eb">8</div><div class="pm-card-lbl">Active Projects</div></div>
+            <div class="pm-card"><div class="pm-card-val" style="color:#059669">$18.5K</div><div class="pm-card-lbl">Revenue This Month</div></div>
+            <div class="pm-card"><div class="pm-card-val" style="color:#f59e0b">3</div><div class="pm-card-lbl">Pending Permits</div></div>
+            <div class="pm-card"><div class="pm-card-val" style="color:#8b5cf6">186</div><div class="pm-card-lbl">Active Workers</div></div>
+          </div>
+          <div class="pm-grid2">
+            <div class="pm-box">
+              <div class="pm-box-title">Project Progress</div>
+              <div class="pm-row"><span>Skyline G+7</span><span class="pm-pill pill-g">68%</span></div>
+              <div class="pm-prog"><div class="pm-prog-fill" style="width:68%;background:linear-gradient(90deg,#2563eb,#6366f1)"></div></div>
+              <div class="pm-row"><span>Metro Hub</span><span class="pm-pill pill-y">34%</span></div>
+              <div class="pm-prog"><div class="pm-prog-fill" style="width:34%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div>
+              <div class="pm-row"><span>Riverside Villa</span><span class="pm-pill pill-g">91%</span></div>
+              <div class="pm-prog"><div class="pm-prog-fill" style="width:91%;background:linear-gradient(90deg,#059669,#10b981)"></div></div>
+            </div>
+            <div class="pm-box">
+              <div class="pm-box-title">Live Alerts</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="background:#fef9c3;border-radius:5px;padding:5px 7px;font-size:10px;color:#854d0e">⚠ 3 permits expiring this week</div>
+                <div style="background:#fee2e2;border-radius:5px;padding:5px 7px;font-size:10px;color:#991b1b">🔴 Cube test CC-003 failed Grid C4</div>
+                <div style="background:#dcfce7;border-radius:5px;padding:5px 7px;font-size:10px;color:#166534">✓ Invoice approved & sent</div>
+                <div style="background:#dbeafe;border-radius:5px;padding:5px 7px;font-size:10px;color:#1e40af">📋 Toolbox talk — 7:00 AM today</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     TRUST BAR
+══════════════════════════════════════════ -->
+<div class="trust-bar">
+  <div class="trust-inner">
+    <div class="trust-item"><i class="fas fa-check-circle"></i> NBC 2025 Compliant</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-check-circle"></i> IS 456 · IS 800 · IS 1893</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-check-circle"></i> ASCE 7 / ACI 318</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-check-circle"></i> Eurocode 2 / 3</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-building"></i> 50+ Companies</div>
+    <div class="trust-divider"></div>
+    <div class="trust-item"><i class="fas fa-mobile-alt"></i> PWA — Works Offline</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROBLEM
+══════════════════════════════════════════ -->
+<section id="about" style="background:var(--bg-soft)">
+  <div class="section-inner">
+    <div class="problem-grid">
+      <div>
+        <div class="section-tag">The Problem</div>
+        <h2 class="section-title">Engineers deserve better than spreadsheets</h2>
+        <p class="section-sub" style="margin-bottom:28px">Most structural teams still run on a patchwork of Excel sheets, email threads, and WhatsApp groups. Data is siloed, errors go unnoticed, and projects slip.</p>
+        <div class="problem-points">
+          <div class="problem-point">
+            <div class="problem-icon" style="background:#fef2f2"><span style="font-size:20px">📊</span></div>
+            <div>
+              <div class="problem-title">Excel sheets break under real projects</div>
+              <div class="problem-desc">Version conflicts, formula errors, no audit trail — one wrong cell can cascade through an entire design.</div>
+            </div>
+          </div>
+          <div class="problem-point">
+            <div class="problem-icon" style="background:#fffbeb"><span style="font-size:20px">🗂️</span></div>
+            <div>
+              <div class="problem-title">No single source of truth</div>
+              <div class="problem-desc">Calculations in one tool, schedules in another, site reports on paper — nobody has the full picture.</div>
+            </div>
+          </div>
+          <div class="problem-point">
+            <div class="problem-icon" style="background:#f0fdf4"><span style="font-size:20px">✅</span></div>
+            <div>
+              <div class="problem-title">NagaForge replaces all of it</div>
+              <div class="problem-desc">One platform. From structural calculations to site diary — engineers and project managers in one workspace.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="problem-visual">
+        <div class="excel-header">📁 Project_Calculations_v7_FINAL_USE_THIS.xlsm</div>
+        <div class="excel-row"><div class="excel-icon">XL</div><div class="excel-name">Beam_Design_v3_copy2.xlsx</div><div class="excel-warn">⚠ Outdated</div></div>
+        <div class="excel-row"><div class="excel-icon">XL</div><div class="excel-name">Column_IS456_March_Final.xlsx</div><div class="excel-age">Modified 3 months ago</div></div>
+        <div class="excel-row"><div class="excel-icon">XL</div><div class="excel-name">NBC_Snow_Load_BACKUP.xlsx</div><div class="excel-warn">⚠ Wrong version</div></div>
+        <div class="excel-row"><div class="excel-icon">XL</div><div class="excel-name">Slab_Design_use_this_one.xlsx</div><div class="excel-age">No version history</div></div>
+        <div class="excel-row"><div class="excel-icon">XL</div><div class="excel-name">Foundation_FINAL_v2_REVISED.xlsx</div><div class="excel-warn">⚠ Formula errors</div></div>
+        <div style="text-align:center;margin-top:16px;padding:12px;background:#fef2f2;border-radius:8px;font-size:12px;color:#991b1b;font-weight:600">This is how most engineering teams work today.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURES
+══════════════════════════════════════════ -->
+<section id="features">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-tag">Platform</div>
+      <h2 class="section-title">Everything in one platform</h2>
+      <p class="section-sub">Twelve integrated modules covering the full lifecycle of a construction project — from design calculations to final handover.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#eff6ff"><i class="fas fa-drafting-compass" style="color:#2563eb;font-size:20px"></i></div>
+        <div class="feature-title">Structural Engineering</div>
+        <div class="feature-desc">IS code, NBC, ASCE, and Eurocode design engines. Beam, column, slab, footing, mix design, BBS — all calculated to code with PDF output.</div>
+        <div class="feature-tags"><span class="ftag">IS 456</span><span class="ftag">NBC 2025</span><span class="ftag">ASCE 7</span><span class="ftag">EC2</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#f0fdf4"><i class="fas fa-cube" style="color:#059669;font-size:20px"></i></div>
+        <div class="feature-title">BIM — 3D Viewer</div>
+        <div class="feature-desc">Upload and manage building elements, run clash detection, generate quantity takeoffs, and view your model in real-time 3D.</div>
+        <div class="feature-tags"><span class="ftag">Clash Detection</span><span class="ftag">Takeoff</span><span class="ftag">3D View</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fdf4ff"><i class="fas fa-chart-gantt" style="color:#9333ea;font-size:20px"></i></div>
+        <div class="feature-title">Scheduling & EVM</div>
+        <div class="feature-desc">CPM critical path analysis, PERT estimation, Earned Value Management with SPI and CPI tracking across all projects.</div>
+        <div class="feature-tags"><span class="ftag">CPM/PERT</span><span class="ftag">Gantt</span><span class="ftag">EVM</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fff7ed"><i class="fas fa-hard-hat" style="color:#ea580c;font-size:20px"></i></div>
+        <div class="feature-title">Site Operations</div>
+        <div class="feature-desc">Daily site diary with weather, manpower and materials. Equipment tracking, fuel logs, and GPS-stamped attendance register.</div>
+        <div class="feature-tags"><span class="ftag">Site Diary</span><span class="ftag">Equipment</span><span class="ftag">Attendance</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#ecfdf5"><i class="fas fa-clipboard-check" style="color:#059669;font-size:20px"></i></div>
+        <div class="feature-title">Quality Control</div>
+        <div class="feature-desc">IS 516 concrete cube tests, QC inspection checklists, non-conformance reports (NCR) with automated escalation workflows.</div>
+        <div class="feature-tags"><span class="ftag">IS 516</span><span class="ftag">NCR</span><span class="ftag">Inspections</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fef2f2"><i class="fas fa-triangle-exclamation" style="color:#dc2626;font-size:20px"></i></div>
+        <div class="feature-title">Safety & HSE</div>
+        <div class="feature-desc">Incident management, permit to work, toolbox talk register, risk assessments, and IS 18001 compliance tracking. Zero-LTI dashboard.</div>
+        <div class="feature-tags"><span class="ftag">PTW</span><span class="ftag">Risk Register</span><span class="ftag">IS 18001</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#eff6ff"><i class="fas fa-coins" style="color:#2563eb;font-size:20px"></i></div>
+        <div class="feature-title">Finance & Commercial</div>
+        <div class="feature-desc">GST-ready invoicing, BOQ management, procurement orders, budget vs actual tracking, and cash flow forecasting.</div>
+        <div class="feature-tags"><span class="ftag">GST</span><span class="ftag">BOQ</span><span class="ftag">Invoicing</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#f8fafc"><i class="fas fa-file-pdf" style="color:#475569;font-size:20px"></i></div>
+        <div class="feature-title">Reports Center</div>
+        <div class="feature-desc">One-click PDF generation for every module — site diary, structural calculations, QC certificates, safety reports, and invoices.</div>
+        <div class="feature-tags"><span class="ftag">PDF Reports</span><span class="ftag">Certificates</span><span class="ftag">Export</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fdf4ff"><i class="fas fa-mobile-alt" style="color:#9333ea;font-size:20px"></i></div>
+        <div class="feature-title">Mobile PWA</div>
+        <div class="feature-desc">Install on any Android or iOS device. Works offline on site, syncs when back online. Full feature access from your phone.</div>
+        <div class="feature-tags"><span class="ftag">Offline Mode</span><span class="ftag">iOS</span><span class="ftag">Android</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CODES
+══════════════════════════════════════════ -->
+<section id="codes" class="codes-section">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-tag" style="background:rgba(96,165,250,.15);color:#93c5fd;border-color:rgba(96,165,250,.3)">Multi-Code Engine</div>
+      <h2 class="section-title" style="color:#fff">Designed for every market</h2>
+      <p class="section-sub" style="color:rgba(255,255,255,.6);margin:0 auto">NagaForge supports four major code families — so your team works to the right standard, wherever the project is.</p>
+    </div>
+    <div class="codes-grid">
+      <div class="code-card">
+        <div class="code-flag">🇨🇦</div>
+        <div class="code-country">Canada</div>
+        <div class="code-name">NBC<span class="code-new">2025</span></div>
+        <ul class="code-list">
+          <li>NBC 2025, 2020, 2015, 2010, 2005</li>
+          <li>Snow loads by location (climatic data)</li>
+          <li>Wind pressure & seismic Sa values</li>
+          <li>CSA S16 steel design</li>
+          <li>CSA A23.3 concrete</li>
+          <li>CSA O86 wood design <span class="code-new">New</span></li>
+          <li>NBC load combinations</li>
+        </ul>
+      </div>
+      <div class="code-card">
+        <div class="code-flag">🇮🇳</div>
+        <div class="code-country">India</div>
+        <div class="code-name">IS Codes</div>
+        <ul class="code-list">
+          <li>IS 456:2000 — RCC design</li>
+          <li>IS 800:2007 — Steel design</li>
+          <li>IS 1893:2016 — Seismic zones</li>
+          <li>IS 875 — Wind & live loads</li>
+          <li>IS 10262 — Mix design</li>
+          <li>IS 516 — Cube test standard</li>
+          <li>Bar bending schedule (BBS)</li>
+        </ul>
+      </div>
+      <div class="code-card">
+        <div class="code-flag">🇺🇸</div>
+        <div class="code-country">United States</div>
+        <div class="code-name">ASCE / ACI</div>
+        <ul class="code-list">
+          <li>ASCE 7-22 load standard</li>
+          <li>ACI 318-19 concrete</li>
+          <li>AISC 360-22 steel</li>
+          <li>Wind & seismic loads</li>
+          <li>USD / LRFD design method</li>
+          <li>IBC 2021 compatible</li>
+        </ul>
+      </div>
+      <div class="code-card">
+        <div class="code-flag">🇪🇺</div>
+        <div class="code-country">Europe</div>
+        <div class="code-name">Eurocode</div>
+        <ul class="code-list">
+          <li>EN 1992 — Concrete</li>
+          <li>EN 1993 — Steel</li>
+          <li>EN 1995 — Timber</li>
+          <li>EN 1991 — Actions / loads</li>
+          <li>EN 1998 — Seismic design</li>
+          <li>National annexes supported</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     MODULES DEEP DIVE
+══════════════════════════════════════════ -->
+<section id="modules">
+  <div class="section-inner">
+    <div class="centered" style="margin-bottom:40px">
+      <div class="section-tag">In Depth</div>
+      <h2 class="section-title">See every module</h2>
+      <p class="section-sub">Click through to explore what each module looks and works like.</p>
+    </div>
+    <div class="modules-tabs">
+      <div class="mod-tab active" onclick="showMod('structural',this)">Structural</div>
+      <div class="mod-tab" onclick="showMod('bim',this)">BIM</div>
+      <div class="mod-tab" onclick="showMod('site',this)">Site Ops</div>
+      <div class="mod-tab" onclick="showMod('qc',this)">Quality Control</div>
+      <div class="mod-tab" onclick="showMod('safety',this)">Safety</div>
+      <div class="mod-tab" onclick="showMod('finance',this)">Finance</div>
+    </div>
+
+    <!-- Structural -->
+    <div id="mod-structural" class="module-content active">
+      <div class="mod-screen">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">IS 456:2000 — Beam Design Output</div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:12px">
+          <div class="calc-row"><span class="calc-key">Code</span><span class="calc-val">IS 456:2000 / NBC 2025</span></div>
+          <div class="calc-row"><span class="calc-key">Span</span><span class="calc-val">6.0 m</span></div>
+          <div class="calc-row"><span class="calc-key">Design Moment (Mu)</span><span class="calc-val">187.5 kNm</span></div>
+          <div class="calc-row"><span class="calc-key">Required Ast</span><span class="calc-val">1,243 mm²</span></div>
+          <div class="calc-row"><span class="calc-key">Provided — 4T20</span><span class="calc-val">1,257 mm²</span></div>
+          <div class="calc-row"><span class="calc-key">Shear check</span><span class="calc-val">✓ Pass — 2L-8@150 c/c</span></div>
+          <div class="calc-row" style="border:none"><span class="calc-key">Overall result</span><span class="calc-pass">✓ SAFE</span></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span class="tag tag-g">IS 456</span><span class="tag tag-b">NBC 2025</span><span class="tag tag-b">ASCE 7</span><span class="tag tag-b">Eurocode 2</span>
+          <span class="tag tag-g">PDF Export</span><span class="tag tag-g">BBS Auto-gen</span>
+        </div>
+      </div>
+      <div class="mod-info">
+        <h3>Code-accurate structural calculations</h3>
+        <p>Replace your Excel sheets with a professional calculation engine that produces stamped, traceable output for every design check — beams, columns, slabs, footings, mix designs, and bar bending schedules.</p>
+        <ul class="mod-bullets">
+          <li><i class="fas fa-check"></i> IS 456, IS 800, IS 1893, IS 875, IS 10262</li>
+          <li><i class="fas fa-check"></i> NBC 2025/2020/2015 with location climatic data</li>
+          <li><i class="fas fa-check"></i> ASCE 7 / ACI 318 / AISC 360</li>
+          <li><i class="fas fa-check"></i> Eurocode 2, 3, and 8</li>
+          <li><i class="fas fa-check"></i> Auto-generated BBS and BOQ</li>
+          <li><i class="fas fa-check"></i> One-click stamped PDF report</li>
+        </ul>
+        <a href="/app?entry=landing#login" class="mod-link">Open Structural Module <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- BIM -->
+    <div id="mod-bim" class="module-content">
+      <div class="mod-screen">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">BIM Model — CPC-BIM-001 v1.2</div>
+        <table class="mini-t" style="margin-bottom:10px">
+          <thead><tr><th>Element</th><th>Level</th><th>Material</th><th>Vol m³</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Column C1–C4</td><td>Ground</td><td>M30 RCC</td><td>4.86</td><td><span class="tag tag-g">Complete</span></td></tr>
+            <tr><td>Beam B1–B2</td><td>GF</td><td>M25 RCC</td><td>3.60</td><td><span class="tag tag-g">Complete</span></td></tr>
+            <tr><td>Slab S1</td><td>GF</td><td>M25 RCC</td><td>18.0</td><td><span class="tag tag-y">In Progress</span></td></tr>
+          </tbody>
+        </table>
+        <div style="background:#dbeafe;border-radius:8px;padding:10px;font-size:12px;color:#1e40af"><strong>Clash Detection:</strong> 0 hard clashes · 2 soft clashes identified</div>
+      </div>
+      <div class="mod-info">
+        <h3>BIM — Building Information Model</h3>
+        <p>Manage your complete building model digitally. Add elements, visualise in 3D, run automated clash detection, and generate accurate quantity takeoffs — all linked to your project.</p>
+        <ul class="mod-bullets">
+          <li><i class="fas fa-check"></i> Full 3D isometric viewer</li>
+          <li><i class="fas fa-check"></i> Element management by floor and type</li>
+          <li><i class="fas fa-check"></i> Automated clash detection</li>
+          <li><i class="fas fa-check"></i> Quantity takeoff with costing</li>
+          <li><i class="fas fa-check"></i> 12+ element types supported</li>
+        </ul>
+        <a href="/app?entry=landing#login" class="mod-link">Open BIM Module <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- Site -->
+    <div id="mod-site" class="module-content">
+      <div class="mod-screen">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Site Diary — 27 Jun 2026</div>
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            <div><span style="color:var(--text-muted)">Weather:</span> <strong>Partly Cloudy, 28°C</strong></div>
+            <div><span style="color:var(--text-muted)">Manpower:</span> <strong>42 workers</strong></div>
+            <div><span style="color:var(--text-muted)">Cement used:</span> <strong>12 bags</strong></div>
+            <div><span style="color:var(--text-muted)">TMT steel:</span> <strong>2.4 MT</strong></div>
+          </div>
+        </div>
+        <table class="mini-t">
+          <thead><tr><th>Equipment</th><th>Status</th><th>Fuel (L)</th></tr></thead>
+          <tbody>
+            <tr><td>Tower Crane TC-01</td><td><span class="tag tag-g">Active</span></td><td>320</td></tr>
+            <tr><td>Concrete Mixer M-02</td><td><span class="tag tag-g">Active</span></td><td>80</td></tr>
+            <tr><td>Excavator EX-01</td><td><span class="tag tag-y">Idle</span></td><td>210</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mod-info">
+        <h3>Site Operations — every day on record</h3>
+        <p>Capture everything that happens on site. Daily diaries approved by site manager, equipment utilisation, fuel consumption, and full attendance register — all timestamped and auditable.</p>
+        <ul class="mod-bullets">
+          <li><i class="fas fa-check"></i> Daily site diary with weather & manpower</li>
+          <li><i class="fas fa-check"></i> Equipment tracking & fuel logs</li>
+          <li><i class="fas fa-check"></i> GPS-stamped biometric attendance</li>
+          <li><i class="fas fa-check"></i> Material consumption records</li>
+          <li><i class="fas fa-check"></i> Manager approval workflow</li>
+        </ul>
+        <a href="/app?entry=landing#login" class="mod-link">Open Site Ops <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- QC -->
+    <div id="mod-qc" class="module-content">
+      <div class="mod-screen">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">IS 516 Concrete Cube Tests</div>
+        <table class="mini-t">
+          <thead><tr><th>Sample</th><th>Grade</th><th>28-Day MPa</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>CC-001-GF</td><td>M30</td><td>34.2</td><td><span class="tag tag-g">Pass</span></td></tr>
+            <tr><td>CC-002-GF</td><td>M30</td><td>33.6</td><td><span class="tag tag-g">Pass</span></td></tr>
+            <tr><td>CC-003-1F</td><td>M25</td><td>22.1</td><td><span class="tag tag-r">Fail — NCR raised</span></td></tr>
+            <tr><td>CC-004-1F</td><td>M25</td><td>28.4</td><td><span class="tag tag-g">Pass</span></td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;background:#fee2e2;border-radius:8px;padding:10px;font-size:12px;color:#991b1b"><strong>NCR-001:</strong> CC-003 failed 28-day strength at Grid C4 — core sample ordered</div>
+      </div>
+      <div class="mod-info">
+        <h3>Quality control that catches issues early</h3>
+        <p>Manage concrete cube tests to IS 516, run structured inspection checklists, and raise non-conformance reports (NCRs) that auto-escalate to the right person before problems become defects.</p>
+        <ul class="mod-bullets">
+          <li><i class="fas fa-check"></i> IS 516 cube test register</li>
+          <li><i class="fas fa-check"></i> Slump test & rebar inspection records</li>
+          <li><i class="fas fa-check"></i> QC inspection checklists</li>
+          <li><i class="fas fa-check"></i> Non-conformance report (NCR) workflow</li>
+          <li><i class="fas fa-check"></i> QC certificate PDF generation</li>
+        </ul>
+        <a href="/app?entry=landing#login" class="mod-link">Open QC Module <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- Safety -->
+    <div id="mod-safety" class="module-content">
+      <div class="mod-screen">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Safety Dashboard</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;text-align:center"><div style="font-size:24px;font-weight:800;color:#059669">0</div><div style="font-size:10px;color:var(--text-muted)">LTI This Month</div></div>
+          <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:10px;text-align:center"><div style="font-size:24px;font-weight:800;color:#854d0e">2</div><div style="font-size:10px;color:var(--text-muted)">Active Permits</div></div>
+          <div style="background:#dbeafe;border:1px solid #bfdbfe;border-radius:8px;padding:10px;text-align:center"><div style="font-size:24px;font-weight:800;color:#1e40af">42</div><div style="font-size:10px;color:var(--text-muted)">Last Toolbox</div></div>
+        </div>
+        <table class="mini-t">
+          <thead><tr><th>Risk</th><th>Level</th><th>Control</th></tr></thead>
+          <tbody>
+            <tr><td>Working at height</td><td><span class="tag tag-r">High</span></td><td>Safety harness</td></tr>
+            <tr><td>Crane lift zone</td><td><span class="tag tag-r">High</span></td><td>Exclusion zone</td></tr>
+            <tr><td>Dust & vibration</td><td><span class="tag tag-g">Low</span></td><td>PPE</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mod-info">
+        <h3>Safety management — zero compromise</h3>
+        <p>Track every incident, manage permits to work, run toolbox talks with attendance, and maintain a live risk register. Built for IS 18001 compliance with a Zero-LTI dashboard.</p>
+        <ul class="mod-bullets">
+          <li><i class="fas fa-check"></i> Incident reporting (mobile-friendly)</li>
+          <li><i class="fas fa-check"></i> Permit to work with expiry alerts</li>
+          <li><i class="fas fa-check"></i> Toolbox talk register with attendance</li>
+          <li><i class="fas fa-check"></i> Risk assessment & control measures</li>
+          <li><i class="fas fa-check"></i> IS 18001 / HSE compliance dashboard</li>
+        </ul>
+        <a href="/app?entry=landing#login" class="mod-link">Open Safety Module <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- Finance -->
+    <div id="mod-finance" class="module-content">
+      <div class="mod-screen">
+        <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Finance Overview</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div style="background:#f0fdf4;border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#059669">$18.5K</div><div style="font-size:10px;color:var(--text-muted)">Invoiced this month</div></div>
+          <div style="background:#fffbeb;border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:800;color:#854d0e">$4.2K</div><div style="font-size:10px;color:var(--text-muted)">Pending receipt</div></div>
+        </div>
+        <table class="mini-t">
+          <thead><tr><th>Invoice</th><th>Client</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>INV-2026-042</td><td>Demo Group</td><td>$8,500</td><td><span class="tag tag-g">Paid</span></td></tr>
+            <tr><td>INV-2026-043</td><td>Urban Corp</td><td>$4,200</td><td><span class="tag tag-y">Pending</span></td></tr>
+            <tr><td>INV-2026-044</td><td>North Builders</td><td>$6,000</td><td><span class="tag tag-b">Sent</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mod-info">
+        <h3>Finance built for construction</h3>
+        <p>GST-ready invoicing, BOQ vs actual tracking, procurement management, and cash flow forecasting — all linked to your live project data so your numbers always add up.</p>
+        <ul class="mod-bullets">
+          <li><i class="fas fa-check"></i> GST-ready invoice generation</li>
+          <li><i class="fas fa-check"></i> BOQ vs actual cost tracking</li>
+          <li><i class="fas fa-check"></i> Procurement & purchase orders</li>
+          <li><i class="fas fa-check"></i> Multi-project budget dashboard</li>
+          <li><i class="fas fa-check"></i> One-click finance PDF reports</li>
+        </ul>
+        <a href="/app?entry=landing#login" class="mod-link">Open Finance Module <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     STATS
+══════════════════════════════════════════ -->
+<div class="stats-band">
+  <div class="stats-inner">
+    <div><div class="stat-val">50<span>+</span></div><div class="stat-label">Construction companies</div></div>
+    <div><div class="stat-val">12<span>+</span></div><div class="stat-label">Integrated modules</div></div>
+    <div><div class="stat-val">4</div><div class="stat-label">Code families supported</div></div>
+    <div><div class="stat-val">100<span>%</span></div><div class="stat-label">Web-based, no install</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PRICING
+══════════════════════════════════════════ -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="centered">
+      <div class="section-tag">Pricing</div>
+      <h2 class="section-title">Simple, transparent pricing</h2>
+      <p class="section-sub">Start with a free workspace and a 30-day trial. Launch offer: USD 5 for the first 2 months per user/role.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-val"><sup>$</sup>0</div>
+        <div class="price-period">forever · 3 users · 2 projects</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Projects & tasks</li>
+          <li><i class="fas fa-check"></i> Basic structural calcs</li>
+          <li><i class="fas fa-check"></i> Documents (1 GB)</li>
+          <li class="off"><i class="fas fa-check"></i> BIM & Scheduling</li>
+          <li class="off"><i class="fas fa-check"></i> QC & Safety modules</li>
+          <li class="off"><i class="fas fa-check"></i> PDF reports</li>
+        </ul>
+        <a href="/app?entry=landing#signup" class="btn btn-outline" style="width:100%;justify-content:center">Get started free</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-val"><sup>$</sup>5</div>
+        <div class="price-period">first 2 months · per user/role</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Everything in Free</li>
+          <li><i class="fas fa-check"></i> Finance & invoicing (GST)</li>
+          <li><i class="fas fa-check"></i> Inventory management</li>
+          <li><i class="fas fa-check"></i> PDF reports</li>
+          <li><i class="fas fa-check"></i> 10 GB storage</li>
+          <li class="off"><i class="fas fa-check"></i> BIM & Scheduling</li>
+        </ul>
+        <a href="/app?entry=landing#signup" class="btn btn-outline" style="width:100%;justify-content:center">Start 30-day trial</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-popular">Most Popular</div>
+        <div class="price-name">Professional</div>
+        <div class="price-val"><sup>$</sup>5</div>
+        <div class="price-period">launch offer · first 2 months per user/role</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> All modules unlocked</li>
+          <li><i class="fas fa-check"></i> BIM 3D viewer & clash</li>
+          <li><i class="fas fa-check"></i> Scheduling — CPM/EVM</li>
+          <li><i class="fas fa-check"></i> QC, Safety, Site Ops</li>
+          <li><i class="fas fa-check"></i> 50 GB storage</li>
+          <li><i class="fas fa-check"></i> Priority support</li>
+        </ul>
+        <a href="/app?entry=landing#signup" class="btn btn-primary" style="width:100%;justify-content:center">Start 30-day trial</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Enterprise</div>
+        <div class="price-val" style="font-size:28px;margin-top:6px">Custom</div>
+        <div class="price-period">unlimited users & projects</div>
+        <ul class="price-features">
+          <li><i class="fas fa-check"></i> Everything in Professional</li>
+          <li><i class="fas fa-check"></i> Custom code versions</li>
+          <li><i class="fas fa-check"></i> On-premise deployment</li>
+          <li><i class="fas fa-check"></i> API access</li>
+          <li><i class="fas fa-check"></i> SLA & dedicated support</li>
+          <li><i class="fas fa-check"></i> Staff training included</li>
+        </ul>
+        <a href="mailto:naga.fmw@gmail.com" class="btn btn-navy" style="width:100%;justify-content:center">Contact sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FINAL CTA
+══════════════════════════════════════════ -->
+<section class="cta-section">
+  <div class="cta-title">Ready to modernise your practice?</div>
+  <p class="cta-sub">Start with a clean workspace for structural calculations, project controls, BIM, quality, safety, and site operations.</p>
+  <div class="cta-actions">
+    <a href="/app?entry=landing#signup" class="btn btn-white btn-xl"><i class="fas fa-rocket"></i> Start Free Today</a>
+    <a href="/linkedin" class="btn btn-ghost btn-xl" target="_blank"><i class="fas fa-play-circle"></i> Watch Demo</a>
+  </div>
+  <p style="margin-top:20px;font-size:12px;color:rgba(255,255,255,.4)">No credit card required · 30-day free trial · Cancel anytime</p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-brand">
+          <div class="footer-brand-icon"><i class="fas fa-building-columns"></i></div>
+          <div class="footer-brand-name">NagaForge</div>
+        </div>
+        <p class="footer-desc">The complete construction engineering platform — structural calculations, project management, BIM, and site operations in one professional tool.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a href="/app?entry=landing#login">Dashboard</a>
+        <a href="/app?entry=landing#login">Structural Calcs</a>
+        <a href="/app?entry=landing#login">BIM Viewer</a>
+        <a href="/app?entry=landing#login">Site Operations</a>
+        <a href="/app?entry=landing#login">Reports Center</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="/docs">API Docs</a>
+        <a href="/walkthrough">Walkthrough</a>
+        <a href="/demo">Live Demo</a>
+        <a href="/linkedin">Product Tour</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="mailto:naga.fmw@gmail.com">Contact</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 NagaForge. Built for engineers who build the world.</div>
+      <div class="footer-codes">
+        <span class="fcode">NBC 2025</span>
+        <span class="fcode">IS 456</span>
+        <span class="fcode">IS 800</span>
+        <span class="fcode">ASCE 7</span>
+        <span class="fcode">ACI 318</span>
+        <span class="fcode">EC2</span>
+        <span class="fcode">CSA S16</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function showMod(id, el) {
+  document.querySelectorAll('.module-content').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('mod-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// Smooth nav shadow on scroll
+window.addEventListener('scroll', () => {
+  document.querySelector('nav').style.boxShadow =
+    window.scrollY > 10 ? '0 2px 16px rgba(0,0,0,.08)' : 'none';
+});
+</script>
+</body>
+</html>

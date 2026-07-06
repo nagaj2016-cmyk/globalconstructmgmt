@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NagaForge — Product Walkthrough</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f172a;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── CHROME ── */
+#chrome{background:#1e293b;border-bottom:1px solid #334155;padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.dots{display:flex;gap:6px}.dot{width:12px;height:12px;border-radius:50%}
+.dot.r{background:#ef4444}.dot.y{background:#f59e0b}.dot.g{background:#22c55e}
+.url-bar{flex:1;background:#0f172a;border:1px solid #334155;border-radius:6px;padding:5px 12px;font-size:.82rem;color:#94a3b8;font-family:monospace}
+.browser-btn{background:#1a56db;color:#fff;border:none;padding:5px 16px;border-radius:6px;cursor:pointer;font-size:.82rem}
+
+/* ── SCREEN ── */
+#screen{flex:1;position:relative;overflow:hidden}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity .5s;pointer-events:none;display:flex;flex-direction:column}
+.slide.active{opacity:1;pointer-events:all}
+
+/* ── CONTROLS ── */
+#controls{background:#1e293b;border-top:1px solid #334155;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+#progress-track{flex:1;height:4px;background:#334155;border-radius:2px;cursor:pointer}
+#progress-fill{height:100%;background:linear-gradient(90deg,#1a56db,#7c3aed);border-radius:2px;transition:width .3s}
+.ctrl-btn{background:none;border:1px solid #334155;color:#94a3b8;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:6px}
+.ctrl-btn:hover{border-color:#1a56db;color:#fff}
+.ctrl-btn.play{background:#1a56db;border-color:#1a56db;color:#fff}
+#step-info{font-size:.78rem;color:#64748b;min-width:120px;text-align:right}
+
+/* ── SLIDE LAYOUTS ── */
+.slide-inner{flex:1;display:flex;flex-direction:column;background:#0f172a}
+
+/* Simulated app chrome */
+.app-chrome{background:#1e293b;height:48px;display:flex;align-items:center;padding:0 16px;gap:12px;border-bottom:1px solid #334155;flex-shrink:0}
+.app-logo{font-weight:800;font-size:1rem;color:#1a56db}
+.app-logo span{color:#f59e0b}
+.app-content{flex:1;display:flex;overflow:hidden}
+.app-sidebar{width:200px;background:#1e293b;border-right:1px solid #334155;padding:8px;flex-shrink:0}
+.app-main{flex:1;padding:20px;overflow:auto;background:#f0f4fa;color:#1e293b}
+
+/* Nav items */
+.snav{padding:7px 12px;border-radius:6px;font-size:.8rem;color:#94a3b8;display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.snav.active{background:#1a56db;color:#fff}
+.snav.highlight{background:rgba(26,86,219,.15);color:#60a5fa;animation:navPulse 1s ease infinite}
+@keyframes navPulse{0%,100%{background:rgba(26,86,219,.15)}50%{background:rgba(26,86,219,.3)}}
+
+/* Spotlight cursor */
+#cursor{width:28px;height:28px;border:3px solid #f59e0b;border-radius:50%;position:fixed;pointer-events:none;z-index:9999;transition:left .6s cubic-bezier(.34,1.56,.64,1),top .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 12px #f59e0b88}
+#cursor::after{content:'';width:6px;height:6px;background:#f59e0b;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+#cursor.click{animation:clickAnim .3s ease}
+@keyframes clickAnim{0%{transform:scale(1)}50%{transform:scale(.7)}100%{transform:scale(1)}}
+
+/* Annotation tooltip */
+.ann{position:absolute;background:#1a56db;color:#fff;padding:8px 14px;border-radius:8px;font-size:.82rem;max-width:260px;line-height:1.4;z-index:1000;box-shadow:0 4px 16px rgba(0,0,0,.4)}
+.ann::before{content:'';position:absolute;width:10px;height:10px;background:#1a56db;rotate:45deg}
+.ann.bottom::before{top:-5px;left:20px}
+.ann.top::before{bottom:-5px;left:20px}
+.ann.right::before{top:12px;left:-5px}
+
+/* Cards / forms inside slides */
+.s-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
+.s-card h3{font-size:.95rem;font-weight:700;margin-bottom:10px;color:#1e293b}
+.s-field{margin-bottom:8px}
+.s-field label{font-size:.72rem;color:#64748b;display:block;margin-bottom:3px}
+.s-input{width:100%;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px;font-size:.83rem;color:#1e293b;background:#fff}
+.s-input.typing{border-color:#1a56db;box-shadow:0 0 0 2px rgba(26,86,219,.2)}
+.s-btn{background:#1a56db;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:.83rem;cursor:pointer;font-weight:600}
+.s-btn-g{background:#10b981;color:#fff;border:none;padding:8px 18px;border-radius:6px;font-size:.83rem;cursor:pointer;font-weight:600}
+
+/* Table */
+.s-tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.s-tbl th{padding:8px 10px;text-align:left;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#64748b;border-bottom:2px solid #e2e8f0;background:#f8faff}
+.s-tbl td{padding:8px 10px;border-bottom:1px solid #f1f5f9}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.7rem;font-weight:700}
+.bg{background:#d1fae5;color:#065f46}.by{background:#fef3c7;color:#92400e}.bb{background:#dbeafe;color:#1e40af}.br{background:#fee2e2;color:#991b1b}.bp{background:#ede9fe;color:#5b21b6}
+
+/* Stats row */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-box{background:#fff;border-radius:10px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-box .val{font-size:1.5rem;font-weight:800}
+.stat-box .lbl{font-size:.72rem;color:#64748b}
+.pbar{height:6px;background:#e2e8f0;border-radius:3px;margin-top:6px;overflow:hidden}
+.pbar .fill{height:100%;border-radius:3px}
+
+/* Toast notification */
+#toast{position:fixed;bottom:80px;right:20px;background:#10b981;color:#fff;padding:10px 18px;border-radius:8px;font-size:.84rem;font-weight:600;z-index:9998;opacity:0;transition:opacity .3s;display:flex;align-items:center;gap:8px}
+#toast.show{opacity:1}
+
+/* Overlay title for slide start */
+.slide-title-overlay{position:absolute;inset:0;background:rgba(0,0,0,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px)}
+.slide-num{font-size:.85rem;color:#60a5fa;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+.slide-ttl{font-size:2rem;font-weight:800;text-align:center;max-width:600px;line-height:1.2}
+.slide-sub{margin-top:10px;color:#94a3b8;font-size:.95rem;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- Animated cursor -->
+<div id="cursor"></div>
+<!-- Toast -->
+<div id="toast"><i class="fas fa-check-circle"></i><span id="toast-msg">Saved</span></div>
+
+<!-- Browser chrome -->
+<div id="chrome">
+  <div class="dots"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+  <div class="url-bar" id="url-bar">http://localhost:8000</div>
+  <div class="browser-btn">Go</div>
+</div>
+
+<!-- Screen -->
+<div id="screen">
+
+<!-- ══ SLIDE 0 — INTRO ══ -->
+<div class="slide active" id="s0">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%)">
+    <div style="font-size:3rem;font-weight:900;margin-bottom:8px">Naga<span style="color:#f59e0b">Forge</span></div>
+    <div style="color:#60a5fa;font-size:1.1rem;margin-bottom:32px">Construction ERP — Product Walkthrough</div>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:480px;width:100%;padding:0 20px">
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem">
+        <span style="background:#1a56db;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">1</span>Create Organisation (Tenant)
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem">
+        <span style="background:#7c3aed;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">2</span>Create a Project &amp; Assign Team
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem">
+        <span style="background:#0891b2;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">3</span>Structural Design (IS 456 / IS 800)
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem">
+        <span style="background:#059669;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">4</span>BIM 3D Model + Site Operations
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem">
+        <span style="background:#d97706;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">5</span>Quality Control, Safety &amp; Finance
+      </div>
+      <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;font-size:.88rem">
+        <span style="background:#dc2626;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">6</span>Dashboard &amp; PDF Reports
+      </div>
+    </div>
+    <div style="margin-top:28px;color:#64748b;font-size:.82rem">▶ Press Play to start the walkthrough</div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 1 — LOGIN ══ -->
+<div class="slide" id="s1">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0f4fa,#e8efff)">
+      <div style="background:#fff;border-radius:14px;padding:32px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.1)">
+        <div style="font-size:1.3rem;font-weight:800;color:#1a56db;margin-bottom:4px">Welcome back</div>
+        <div style="color:#64748b;font-size:.82rem;margin-bottom:20px">Sign in to NagaForge</div>
+        <div class="s-field"><label>Username</label><input id="login-user" class="s-input" value="" placeholder="admin"/></div>
+        <div class="s-field"><label>Password</label><input id="login-pass" class="s-input" type="password" value="" placeholder="••••••••"/></div>
+        <div id="login-btn" class="s-btn" style="width:100%;text-align:center;margin-top:12px;cursor:pointer">Sign In</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 2 — DASHBOARD ══ -->
+<div class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span><span style="color:#64748b;font-size:.82rem;margin-left:auto"><i class="fas fa-user-circle"></i> admin</span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav active"><i class="fas fa-tachometer-alt"></i>Dashboard</div>
+        <div class="snav"><i class="fas fa-building"></i>Organisations</div>
+        <div class="snav"><i class="fas fa-folder-open"></i>Projects</div>
+        <div class="snav"><i class="fas fa-drafting-compass"></i>Structural</div>
+        <div class="snav"><i class="fas fa-cube"></i>BIM</div>
+        <div class="snav"><i class="fas fa-hard-hat"></i>Site Ops</div>
+        <div class="snav"><i class="fas fa-microscope"></i>Quality</div>
+        <div class="snav"><i class="fas fa-shield-alt"></i>Safety</div>
+        <div class="snav"><i class="fas fa-receipt"></i>Finance</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px">Welcome, Admin — NagaForge Demo</div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="val" style="color:#1a56db">2</div><div class="lbl">Active Projects</div></div>
+          <div class="stat-box"><div class="val" style="color:#10b981">47</div><div class="lbl">Workers On Site</div></div>
+          <div class="stat-box"><div class="val" style="color:#f59e0b">27%</div><div class="lbl">Budget Utilised</div></div>
+          <div class="stat-box"><div class="val" style="color:#ef4444">1</div><div class="lbl">Open NCRs</div></div>
+        </div>
+        <div class="s-card">
+          <h3>Project Progress</h3>
+          <div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px"><span>Demo Residential Tower (G+7)</span><strong>27%</strong></div><div class="pbar"><div class="fill" style="width:27%;background:#1a56db"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px"><span>Demo Commercial Complex (G+3 Steel)</span><strong>0%</strong></div><div class="pbar"><div class="fill" style="width:0%;background:#7c3aed"></div></div></div>
+        </div>
+        <div id="ann-dashboard" class="ann bottom" style="bottom:20px;left:40px;display:none">
+          <strong>Dashboard</strong> — One-view summary of all projects, safety KPIs, budget, and team status.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 3 — ORGANISATION ══ -->
+<div class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-tachometer-alt"></i>Dashboard</div>
+        <div class="snav highlight"><i class="fas fa-building"></i>Organisations</div>
+        <div class="snav"><i class="fas fa-folder-open"></i>Projects</div>
+        <div class="snav"><i class="fas fa-drafting-compass"></i>Structural</div>
+        <div class="snav"><i class="fas fa-cube"></i>BIM</div>
+        <div class="snav"><i class="fas fa-hard-hat"></i>Site Ops</div>
+        <div class="snav"><i class="fas fa-microscope"></i>Quality</div>
+        <div class="snav"><i class="fas fa-shield-alt"></i>Safety</div>
+        <div class="snav"><i class="fas fa-receipt"></i>Finance</div>
+      </div>
+      <div class="app-main">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:1.1rem;font-weight:700">Organisations</div>
+          <div id="new-org-btn" class="s-btn" style="cursor:pointer"><i class="fas fa-plus"></i> New Organisation</div>
+        </div>
+        <div class="s-card" id="org-form" style="display:none">
+          <h3><i class="fas fa-building" style="color:#1a56db"></i> Create New Organisation</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="s-field"><label>Company Name *</label><input id="org-name" class="s-input" placeholder="Enter company name"/></div>
+            <div class="s-field"><label>Short Name</label><input id="org-short" class="s-input" placeholder="e.g. ACME"/></div>
+            <div class="s-field"><label>Country</label><select class="s-input"><option>India</option><option>UAE</option><option>Canada</option></select></div>
+            <div class="s-field"><label>Plan</label><select class="s-input"><option>professional</option><option>starter</option><option>enterprise</option></select></div>
+            <div class="s-field"><label>Admin Username</label><input id="org-user" class="s-input" placeholder="admin username"/></div>
+            <div class="s-field"><label>Admin Password</label><input class="s-input" type="password" placeholder="••••••••"/></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <div id="org-save" class="s-btn-g" style="cursor:pointer"><i class="fas fa-check"></i> Create &amp; Onboard</div>
+          </div>
+        </div>
+        <table class="s-tbl">
+          <thead><tr><th>Company</th><th>Short</th><th>Country</th><th>Plan</th><th>Status</th><th>Tenant ID</th></tr></thead>
+          <tbody>
+            <tr><td><strong>NagaForge Demo Company</strong></td><td>NGF</td><td>India</td><td><span class="badge bp">Professional</span></td><td><span class="badge bg">Active</span></td><td>#1</td></tr>
+            <tr><td><strong>NagaProCompany</strong></td><td>NAGA</td><td>India</td><td><span class="badge bb">Starter</span></td><td><span class="badge bg">Active</span></td><td>#2</td></tr>
+            <tr id="new-org-row" style="display:none"><td><strong id="new-org-name-cell" style="color:#10b981">—</strong></td><td id="new-org-short-cell">—</td><td>India</td><td><span class="badge bp">Professional</span></td><td><span class="badge bg">Active</span></td><td>#3</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 4 — PROJECT ══ -->
+<div class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-tachometer-alt"></i>Dashboard</div>
+        <div class="snav"><i class="fas fa-building"></i>Organisations</div>
+        <div class="snav highlight"><i class="fas fa-folder-open"></i>Projects</div>
+        <div class="snav"><i class="fas fa-drafting-compass"></i>Structural</div>
+        <div class="snav"><i class="fas fa-cube"></i>BIM</div>
+      </div>
+      <div class="app-main">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div style="font-size:1.1rem;font-weight:700">Projects</div>
+          <div class="s-btn"><i class="fas fa-plus"></i> New Project</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="s-card" style="border-left:4px solid #1a56db">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-weight:700">Demo Residential Tower</div><div style="font-size:.75rem;color:#64748b">DEMO-PRJ-001 · G+7 RCC</div></div><span class="badge bg">Active</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.78rem;margin-bottom:10px">
+              <div><span style="color:#64748b">Budget:</span> ₹4.5 Cr</div><div><span style="color:#64748b">Spent:</span> ₹1.2 Cr</div>
+              <div><span style="color:#64748b">Start:</span> Mar 2026</div><div><span style="color:#64748b">End:</span> Jun 2027</div>
+            </div>
+            <div style="font-size:.78rem;margin-bottom:4px;display:flex;justify-content:space-between"><span>Progress</span><strong>27%</strong></div>
+            <div class="pbar"><div class="fill" style="width:27%;background:#1a56db"></div></div>
+          </div>
+          <div class="s-card" style="border-left:4px solid #7c3aed">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-weight:700">Demo Commercial Complex</div><div style="font-size:.75rem;color:#64748b">DEMO-PRJ-002 · G+3 Steel</div></div><span class="badge bp">Planning</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.78rem;margin-bottom:10px">
+              <div><span style="color:#64748b">Budget:</span> ₹2.8 Cr</div><div><span style="color:#64748b">Spent:</span> ₹0</div>
+              <div><span style="color:#64748b">Start:</span> Jul 2026</div><div><span style="color:#64748b">End:</span> Dec 2027</div>
+            </div>
+            <div style="font-size:.78rem;margin-bottom:4px;display:flex;justify-content:space-between"><span>Progress</span><strong>0%</strong></div>
+            <div class="pbar"><div class="fill" style="width:0%;background:#7c3aed"></div></div>
+          </div>
+        </div>
+        <div id="ann-proj" class="ann bottom" style="bottom:20px;left:40px;display:none">
+          <strong>Projects</strong> — Each project tracks budget, schedule, team, documents and all modules. All data seeds automatically on creation.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 5 — STRUCTURAL ══ -->
+<div class="slide" id="s5">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-folder-open"></i>Projects</div>
+        <div class="snav highlight"><i class="fas fa-drafting-compass"></i>Structural Design</div>
+        <div class="snav"><i class="fas fa-cube"></i>BIM</div>
+        <div class="snav"><i class="fas fa-hard-hat"></i>Site Ops</div>
+        <div class="snav"><i class="fas fa-microscope"></i>Quality</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px"><i class="fas fa-drafting-compass" style="color:#1a56db"></i> Structural Design Engine</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <div class="s-btn">IS 456 RCC</div>
+          <div class="s-btn" style="background:#7c3aed">IS 800 Steel</div>
+          <div class="s-btn" style="background:#0891b2">Mix Design</div>
+          <div class="s-btn" style="background:#059669">BBS</div>
+          <div class="s-btn" style="background:#d97706">BOQ</div>
+        </div>
+        <div class="s-card">
+          <h3>Beam Design — IS 456:2000</h3>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px">
+            <div class="s-field"><label>Grade of Concrete</label><select class="s-input"><option>M25</option><option selected>M30</option><option>M35</option></select></div>
+            <div class="s-field"><label>Grade of Steel</label><select class="s-input"><option selected>Fe415</option><option>Fe500</option></select></div>
+            <div class="s-field"><label>Span (m)</label><input class="s-input" value="6.0"/></div>
+            <div class="s-field"><label>Width b (mm)</label><input class="s-input" value="230"/></div>
+            <div class="s-field"><label>Overall Depth D (mm)</label><input class="s-input" value="450"/></div>
+            <div class="s-field"><label>Factored Moment Mu (kN·m)</label><input class="s-input" value="168"/></div>
+          </div>
+          <div class="s-btn"><i class="fas fa-calculator"></i> Design Beam</div>
+        </div>
+        <div class="s-card" style="background:#0f172a;color:#e2e8f0;font-family:monospace;font-size:.78rem;line-height:1.8">
+          <div style="color:#63b3ed">// IS 456:2000 — Beam Design Results</div>
+          <div>Effective Depth d = <span style="color:#fbbf24">400 mm</span></div>
+          <div>Mu,lim = <span style="color:#fbbf24">126.96 kN·m</span> → <span style="color:#f87171">Doubly reinforced required</span></div>
+          <div>Tension Steel Ast = <span style="color:#86efac">1257 mm² (4–20φ) ✓</span></div>
+          <div>Compression Asc = <span style="color:#86efac">402 mm² (2–16φ) ✓</span></div>
+          <div>Shear links = <span style="color:#86efac">8φ @ 150 c/c ✓</span></div>
+          <div style="color:#a78bfa">// Result: SAFE — All IS 456 checks passed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 6 — BIM ══ -->
+<div class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-drafting-compass"></i>Structural</div>
+        <div class="snav highlight"><i class="fas fa-cube"></i>BIM Viewer</div>
+        <div class="snav"><i class="fas fa-hard-hat"></i>Site Ops</div>
+        <div class="snav"><i class="fas fa-microscope"></i>Quality</div>
+        <div class="snav"><i class="fas fa-shield-alt"></i>Safety</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px"><i class="fas fa-cube" style="color:#1a56db"></i> BIM 3D Model — Demo Residential Tower</div>
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:14px">
+          <div style="background:#0f172a;border-radius:10px;padding:16px;position:relative;min-height:220px">
+            <div style="position:absolute;top:10px;left:10px;display:flex;gap:6px">
+              <div style="background:rgba(255,255,255,.1);color:#fff;padding:4px 10px;border-radius:4px;font-size:.72rem;cursor:pointer">Plan</div>
+              <div style="background:#1a56db;color:#fff;padding:4px 10px;border-radius:4px;font-size:.72rem;cursor:pointer">3D</div>
+              <div style="background:rgba(255,255,255,.1);color:#fff;padding:4px 10px;border-radius:4px;font-size:.72rem;cursor:pointer">Section</div>
+            </div>
+            <!-- Minimal isometric BIM sketch -->
+            <svg viewBox="0 0 300 180" style="width:100%;height:180px">
+              <defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity=".6"/><stop offset="100%" stop-color="#1e40af" stop-opacity=".8"/></linearGradient></defs>
+              <!-- Floors -->
+              <rect x="30" y="130" width="240" height="8" fill="rgba(99,179,237,.3)" stroke="rgba(99,179,237,.8)" stroke-width="1" rx="1"/>
+              <rect x="30" y="110" width="240" height="8" fill="rgba(99,179,237,.3)" stroke="rgba(99,179,237,.8)" stroke-width="1" rx="1"/>
+              <rect x="30" y="90"  width="240" height="8" fill="rgba(99,179,237,.3)" stroke="rgba(99,179,237,.8)" stroke-width="1" rx="1"/>
+              <rect x="30" y="70"  width="240" height="8" fill="rgba(99,179,237,.3)" stroke="rgba(99,179,237,.8)" stroke-width="1" rx="1"/>
+              <rect x="30" y="50"  width="240" height="8" fill="rgba(99,179,237,.3)" stroke="rgba(99,179,237,.8)" stroke-width="1" rx="1"/>
+              <!-- Columns -->
+              <rect x="36"  y="50" width="12" height="88" fill="rgba(251,191,36,.7)" rx="2"/>
+              <rect x="96"  y="50" width="12" height="88" fill="rgba(251,191,36,.7)" rx="2"/>
+              <rect x="156" y="50" width="12" height="88" fill="rgba(251,191,36,.7)" rx="2"/>
+              <rect x="216" y="50" width="12" height="88" fill="rgba(251,191,36,.7)" rx="2"/>
+              <rect x="252" y="50" width="12" height="88" fill="rgba(251,191,36,.7)" rx="2"/>
+              <!-- Beams -->
+              <rect x="36" y="58" width="228" height="7" fill="rgba(236,72,153,.6)" rx="2"/>
+              <rect x="36" y="98" width="228" height="7" fill="rgba(236,72,153,.6)" rx="2"/>
+              <!-- Labels -->
+              <text x="150" y="165" fill="rgba(255,255,255,.6)" font-size="8" text-anchor="middle">G+7 RCC Residential Tower — 4800 m²</text>
+              <text x="10" y="134" fill="rgba(251,191,36,.8)" font-size="7">GF</text>
+              <text x="10" y="114" fill="rgba(251,191,36,.8)" font-size="7">1F</text>
+              <text x="10" y="94"  fill="rgba(251,191,36,.8)" font-size="7">2F</text>
+              <text x="10" y="74"  fill="rgba(251,191,36,.8)" font-size="7">3F</text>
+            </svg>
+          </div>
+          <div>
+            <div class="s-card" style="margin-bottom:10px">
+              <h3>Selected: Column C1-GF</h3>
+              <div style="font-size:.78rem;display:flex;flex-direction:column;gap:5px">
+                <div><span style="color:#64748b">Material:</span> Concrete M30</div>
+                <div><span style="color:#64748b">Size:</span> 450×450mm</div>
+                <div><span style="color:#64748b">Height:</span> 3.6m</div>
+                <div><span style="color:#64748b">Volume:</span> 0.73 m³</div>
+                <div><span style="color:#64748b">Code:</span> IS 456:2000</div>
+                <div><span style="color:#64748b">Status:</span> <span class="badge bg">Complete</span></div>
+              </div>
+            </div>
+            <div class="s-card">
+              <h3>Model Stats</h3>
+              <div style="font-size:.78rem;display:flex;flex-direction:column;gap:4px">
+                <div>Columns: <strong>32</strong></div>
+                <div>Beams: <strong>64</strong></div>
+                <div>Slabs: <strong>8</strong></div>
+                <div>Walls: <strong>48</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 7 — SITE OPS ══ -->
+<div class="slide" id="s7">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-cube"></i>BIM</div>
+        <div class="snav highlight"><i class="fas fa-hard-hat"></i>Site Operations</div>
+        <div class="snav"><i class="fas fa-microscope"></i>Quality</div>
+        <div class="snav"><i class="fas fa-shield-alt"></i>Safety</div>
+        <div class="snav"><i class="fas fa-receipt"></i>Finance</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px"><i class="fas fa-hard-hat" style="color:#1a56db"></i> Site Operations</div>
+        <div style="display:flex;gap:6px;margin-bottom:14px">
+          <div class="s-btn">Daily Diary</div>
+          <div class="s-btn" style="background:#94a3b8">Equipment</div>
+          <div class="s-btn" style="background:#94a3b8">Attendance</div>
+          <div class="s-btn" style="background:#94a3b8">Materials</div>
+        </div>
+        <div class="s-card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+            <div>
+              <div style="font-weight:700;font-size:.95rem">Today's Site Diary</div>
+              <div style="font-size:.75rem;color:#64748b">Demo Residential Tower — 28 Jun 2026</div>
+            </div>
+            <span class="badge bg">Submitted</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px">
+            <div style="background:#f0f4fa;border-radius:6px;padding:8px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:#1a56db">47</div><div style="font-size:.7rem;color:#64748b">Workers</div></div>
+            <div style="background:#f0f4fa;border-radius:6px;padding:8px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:#059669">6</div><div style="font-size:.7rem;color:#64748b">Engineers</div></div>
+            <div style="background:#f0f4fa;border-radius:6px;padding:8px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:#d97706">34°C</div><div style="font-size:.7rem;color:#64748b">Temp</div></div>
+            <div style="background:#f0f4fa;border-radius:6px;padding:8px;text-align:center"><div style="font-size:1.2rem;font-weight:700;color:#0891b2">Sunny</div><div style="font-size:.7rem;color:#64748b">Weather</div></div>
+          </div>
+          <div style="font-size:.82rem"><strong>Work Done:</strong> Foundation concreting — Column C1-C6 completed. Cube samples taken. Formwork struck at basement.</div>
+          <div style="font-size:.82rem;margin-top:4px"><strong>Equipment:</strong> Tower Crane TC-5013 · Concrete Pump CP-36 · Vibrators ×2</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="s-card">
+            <h3>Equipment on Site</h3>
+            <table class="s-tbl"><thead><tr><th>Equipment</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Tower Crane TC-5013</td><td><span class="badge bg">Active</span></td></tr>
+              <tr><td>Concrete Pump CP-36</td><td><span class="badge bg">Active</span></td></tr>
+              <tr><td>Generator DG 125kVA</td><td><span class="badge bg">Active</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="s-card">
+            <h3>Attendance Today</h3>
+            <div style="font-size:.82rem;display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;justify-content:space-between"><span>Present</span><strong style="color:#059669">44</strong></div>
+              <div style="display:flex;justify-content:space-between"><span>Absent</span><strong style="color:#ef4444">3</strong></div>
+              <div style="display:flex;justify-content:space-between"><span>OT Workers</span><strong style="color:#d97706">8</strong></div>
+              <div class="pbar" style="margin-top:6px"><div class="fill" style="width:93%;background:#059669"></div></div>
+              <div style="font-size:.7rem;color:#64748b">93.6% attendance rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 8 — QUALITY ══ -->
+<div class="slide" id="s8">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-hard-hat"></i>Site Ops</div>
+        <div class="snav highlight"><i class="fas fa-microscope"></i>Quality Control</div>
+        <div class="snav"><i class="fas fa-shield-alt"></i>Safety</div>
+        <div class="snav"><i class="fas fa-receipt"></i>Finance</div>
+        <div class="snav"><i class="fas fa-chart-bar"></i>Reports</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px"><i class="fas fa-microscope" style="color:#1a56db"></i> Quality Control</div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="val" style="color:#059669">3/3</div><div class="lbl">Cube Tests Passed</div></div>
+          <div class="stat-box"><div class="val" style="color:#1a56db">4</div><div class="lbl">QC Inspections</div></div>
+          <div class="stat-box"><div class="val" style="color:#ef4444">1</div><div class="lbl">Open NCR</div></div>
+          <div class="stat-box"><div class="val" style="color:#d97706">0</div><div class="lbl">Punch Items</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:12px">
+          <div class="s-card">
+            <h3>Cube Test Results (IS 516)</h3>
+            <table class="s-tbl"><thead><tr><th>Sample</th><th>Element</th><th>Grade</th><th>fck MPa</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td>CUBE-001</td><td>Column C1-GF</td><td>M30</td><td>31.2</td><td><span class="badge bg">Pass</span></td></tr>
+              <tr><td>CUBE-002</td><td>Slab S1-GF</td><td>M25</td><td>26.5</td><td><span class="badge bg">Pass</span></td></tr>
+              <tr><td>CUBE-003</td><td>Beam B1-GF</td><td>M30</td><td>29.8</td><td><span class="badge bg">Pass</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="s-card">
+            <h3>Open NCR</h3>
+            <div style="padding:8px;background:#fff7ed;border-radius:6px;border-left:3px solid #f97316">
+              <div style="font-weight:700;font-size:.85rem">NCR-001 · Minor</div>
+              <div style="font-size:.78rem;color:#64748b;margin-top:4px">Brick masonry — incorrect bond pattern. External wall, Ground Floor.</div>
+              <div style="font-size:.75rem;margin-top:6px"><strong>Action:</strong> Demolish and rebuild</div>
+              <div style="margin-top:6px"><span class="badge by">Due in 5 days</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 9 — SAFETY ══ -->
+<div class="slide" id="s9">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-microscope"></i>Quality</div>
+        <div class="snav highlight"><i class="fas fa-shield-alt"></i>Safety &amp; HSE</div>
+        <div class="snav"><i class="fas fa-receipt"></i>Finance</div>
+        <div class="snav"><i class="fas fa-chart-bar"></i>Reports</div>
+        <div class="snav"><i class="fas fa-folder"></i>Documents</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px"><i class="fas fa-shield-alt" style="color:#ef4444"></i> Safety &amp; HSE</div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="val" style="color:#059669">127</div><div class="lbl">LTI-Free Days</div></div>
+          <div class="stat-box"><div class="val" style="color:#1a56db">4</div><div class="lbl">Toolbox Talks</div></div>
+          <div class="stat-box"><div class="val" style="color:#d97706">2</div><div class="lbl">Open Permits</div></div>
+          <div class="stat-box"><div class="val" style="color:#7c3aed">5</div><div class="lbl">Risk Assessments</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="s-card">
+            <h3>Permits to Work</h3>
+            <table class="s-tbl"><thead><tr><th>Permit</th><th>Type</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>PTW-001</td><td>Height Work</td><td><span class="badge bg">Approved</span></td></tr>
+              <tr><td>PTW-002</td><td>Hot Work</td><td><span class="badge" style="background:#f1f5f9;color:#475569">Closed</span></td></tr>
+              <tr><td>PTW-003</td><td>Excavation</td><td><span class="badge by">Pending</span></td></tr>
+            </tbody></table>
+          </div>
+          <div class="s-card">
+            <h3>Risk Register</h3>
+            <table class="s-tbl"><thead><tr><th>Activity</th><th>Score</th><th>Level</th></tr></thead>
+            <tbody>
+              <tr><td>Height Work</td><td>20</td><td><span class="badge br">High</span></td></tr>
+              <tr><td>Concrete Pour</td><td>15</td><td><span class="badge br">High</span></td></tr>
+              <tr><td>Crane Ops</td><td>10</td><td><span class="badge by">Medium</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 10 — FINANCE ══ -->
+<div class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-shield-alt"></i>Safety</div>
+        <div class="snav highlight"><i class="fas fa-receipt"></i>Finance</div>
+        <div class="snav"><i class="fas fa-chart-bar"></i>Reports</div>
+        <div class="snav"><i class="fas fa-folder"></i>Documents</div>
+        <div class="snav"><i class="fas fa-boxes"></i>Inventory</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:12px"><i class="fas fa-receipt" style="color:#059669"></i> Finance &amp; Billing</div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="val" style="color:#059669">₹35.4L</div><div class="lbl">Revenue Collected</div></div>
+          <div class="stat-box"><div class="val" style="color:#d97706">₹59L</div><div class="lbl">Pending Invoices</div></div>
+          <div class="stat-box"><div class="val" style="color:#ef4444">₹12L</div><div class="lbl">Total Expenses</div></div>
+          <div class="stat-box"><div class="val" style="color:#1a56db">18%</div><div class="lbl">GST Rate</div></div>
+        </div>
+        <div class="s-card">
+          <h3>Invoices</h3>
+          <table class="s-tbl"><thead><tr><th>Invoice#</th><th>Client</th><th>Subtotal</th><th>GST</th><th>Total</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>INV-NGF-0001</strong></td><td>Demo Holdings</td><td>₹50,00,000</td><td>₹9,00,000</td><td><strong>₹59,00,000</strong></td><td><span class="badge bb">Sent</span></td></tr>
+            <tr><td><strong>INV-NGF-0000</strong></td><td>Demo Holdings</td><td>₹30,00,000</td><td>₹5,40,000</td><td><strong>₹35,40,000</strong></td><td><span class="badge bg">Paid</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 11 — REPORTS ══ -->
+<div class="slide" id="s11">
+  <div class="slide-inner">
+    <div class="app-chrome"><span class="app-logo">Naga<span>Forge</span></span></div>
+    <div class="app-content">
+      <div class="app-sidebar">
+        <div class="snav"><i class="fas fa-receipt"></i>Finance</div>
+        <div class="snav highlight"><i class="fas fa-chart-bar"></i>Reports &amp; Analytics</div>
+        <div class="snav"><i class="fas fa-folder"></i>Documents</div>
+        <div class="snav"><i class="fas fa-cog"></i>Settings</div>
+      </div>
+      <div class="app-main">
+        <div style="font-size:1.1rem;font-weight:700;margin-bottom:14px"><i class="fas fa-chart-bar" style="color:#7c3aed"></i> Reports &amp; PDF Export</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div class="s-card" style="text-align:center;cursor:pointer">
+            <div style="font-size:2rem;color:#1a56db;margin-bottom:8px"><i class="fas fa-hard-hat"></i></div>
+            <div style="font-weight:700;font-size:.9rem">Project Progress</div>
+            <div style="font-size:.75rem;color:#64748b;margin:4px 0 10px">Gantt · EVM · S-curve</div>
+            <div class="s-btn" style="font-size:.75rem;padding:5px 12px"><i class="fas fa-download"></i> Download PDF</div>
+          </div>
+          <div class="s-card" style="text-align:center;cursor:pointer">
+            <div style="font-size:2rem;color:#10b981;margin-bottom:8px"><i class="fas fa-shield-alt"></i></div>
+            <div style="font-weight:700;font-size:.9rem">Monthly HSE Report</div>
+            <div style="font-size:.75rem;color:#64748b;margin:4px 0 10px">Incidents · PTW · KPIs</div>
+            <div class="s-btn" style="background:#10b981;font-size:.75px;padding:5px 12px"><i class="fas fa-download"></i> Download PDF</div>
+          </div>
+          <div class="s-card" style="text-align:center;cursor:pointer">
+            <div style="font-size:2rem;color:#7c3aed;margin-bottom:8px"><i class="fas fa-microscope"></i></div>
+            <div style="font-weight:700;font-size:.9rem">QC Report</div>
+            <div style="font-size:.75rem;color:#64748b;margin:4px 0 10px">Cube tests · NCR log</div>
+            <div class="s-btn" style="background:#7c3aed;font-size:.75rem;padding:5px 12px"><i class="fas fa-download"></i> Download PDF</div>
+          </div>
+        </div>
+        <div class="s-card" style="margin-top:0">
+          <h3>Monthly Expense Trend (₹ Lakhs)</h3>
+          <div style="display:flex;align-items:flex-end;gap:8px;height:90px;padding-top:10px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:.68rem;color:#64748b">₹8L</div><div style="flex:1;width:100%;background:#dbeafe;border-radius:4px 4px 0 0" data-h="40"></div><div style="font-size:.65rem;color:#94a3b8">Jan</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:.68rem;color:#64748b">₹12L</div><div style="flex:1;width:100%;background:#bfdbfe;border-radius:4px 4px 0 0" data-h="55"></div><div style="font-size:.65rem;color:#94a3b8">Feb</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:.68rem;color:#64748b">₹18L</div><div style="flex:1;width:100%;background:#93c5fd;border-radius:4px 4px 0 0" data-h="70"></div><div style="font-size:.65rem;color:#94a3b8">Mar</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:.68rem;color:#64748b">₹25L</div><div style="flex:1;width:100%;background:#3b82f6;border-radius:4px 4px 0 0" data-h="85"></div><div style="font-size:.65rem;color:#94a3b8">Apr</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:.68rem;color:#64748b">₹22L</div><div style="flex:1;width:100%;background:#2563eb;border-radius:4px 4px 0 0" data-h="78"></div><div style="font-size:.65rem;color:#94a3b8">May</div></div>
+            <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px"><div style="font-size:.68rem;color:#64748b">₹35L</div><div style="flex:1;width:100%;background:#1d4ed8;border-radius:4px 4px 0 0" data-h="90"></div><div style="font-size:.65rem;color:#94a3b8">Jun</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SLIDE 12 — END ══ -->
+<div class="slide" id="s12">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%)">
+    <div style="font-size:2.5rem;font-weight:900;margin-bottom:8px">Naga<span style="color:#f59e0b">Forge</span></div>
+    <div style="color:#60a5fa;margin-bottom:28px;font-size:1rem">End-to-End Construction ERP</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:600px;margin-bottom:28px">
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center;font-size:.82rem"><i class="fas fa-drafting-compass" style="color:#60a5fa;font-size:1.3rem;display:block;margin-bottom:6px"></i>IS 456 / IS 800<br>Structural Design</div>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center;font-size:.82rem"><i class="fas fa-cube" style="color:#a78bfa;font-size:1.3rem;display:block;margin-bottom:6px"></i>BIM 3D<br>Model Viewer</div>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center;font-size:.82rem"><i class="fas fa-hard-hat" style="color:#34d399;font-size:1.3rem;display:block;margin-bottom:6px"></i>Site Ops<br>&amp; Attendance</div>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center;font-size:.82rem"><i class="fas fa-microscope" style="color:#fbbf24;font-size:1.3rem;display:block;margin-bottom:6px"></i>Quality Control<br>IS 516 Cube Tests</div>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center;font-size:.82rem"><i class="fas fa-shield-alt" style="color:#f87171;font-size:1.3rem;display:block;margin-bottom:6px"></i>HSE Safety<br>PTW &amp; Risk</div>
+      <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:12px;text-align:center;font-size:.82rem"><i class="fas fa-receipt" style="color:#6ee7b7;font-size:1.3rem;display:block;margin-bottom:6px"></i>Finance<br>BOQ &amp; Invoice</div>
+    </div>
+    <div style="color:#64748b;font-size:.82rem">Multi-tenant SaaS · Mobile PWA · PDF Reports · IS / AISC / Eurocode</div>
+  </div>
+</div>
+
+</div><!-- /screen -->
+
+<!-- Controls -->
+<div id="controls">
+  <button class="ctrl-btn" onclick="prevSlide()"><i class="fas fa-step-backward"></i> Prev</button>
+  <button class="ctrl-btn play" id="play-btn" onclick="togglePlay()"><i class="fas fa-pause" id="play-icon"></i> <span id="play-label">Pause</span></button>
+  <div id="progress-track" onclick="seekProgress(event)"><div id="progress-fill" style="width:0%"></div></div>
+  <button class="ctrl-btn" onclick="nextSlide()"><i class="fas fa-step-forward"></i> Next</button>
+  <div id="step-info">Step 1 / 13</div>
+</div>
+
+<script>
+const SLIDES = document.querySelectorAll('.slide');
+const N = SLIDES.length;
+let cur = 0, playing = true, timer = null;
+
+const URLS = [
+  'http://localhost:8000/',
+  'http://localhost:8000/app#login',
+  'http://localhost:8000/app#dashboard',
+  'http://localhost:8000/app#organisations',
+  'http://localhost:8000/app#projects',
+  'http://localhost:8000/app#structural',
+  'http://localhost:8000/app#bim',
+  'http://localhost:8000/app#site-ops',
+  'http://localhost:8000/app#quality',
+  'http://localhost:8000/app#safety',
+  'http://localhost:8000/app#finance',
+  'http://localhost:8000/app#reports',
+  'http://localhost:8000/',
+];
+
+const DURATIONS = [4000,5000,5000,9000,5000,6000,5000,5000,5000,5000,5000,5000,4000];
+
+// Cursor
+const cursor = document.getElementById('cursor');
+let cx = window.innerWidth/2, cy = window.innerHeight/2;
+const CURSOR_TARGETS = [
+  null,
+  {x:.5,y:.55},{x:.5,y:.48},  // login
+  {x:.85,y:.4},{x:.15,y:.3},   // dashboard, org btn
+  {x:.15,y:.38},{x:.55,y:.55}, // proj nav, structural calc
+  {x:.15,y:.33},{x:.15,y:.4},  // BIM, site nav
+  {x:.15,y:.47},{x:.15,y:.55}, // quality, safety
+  {x:.15,y:.62},{x:.5,y:.5},   // finance, reports
+];
+
+function moveCursor(slide) {
+  const t = CURSOR_TARGETS[slide];
+  if (!t) return;
+  cursor.style.left = (t.x * window.innerWidth) + 'px';
+  cursor.style.top = (t.y * window.innerHeight) + 'px';
+}
+
+function showSlide(n) {
+  SLIDES.forEach((s,i)=>s.classList.toggle('active', i===n));
+  document.getElementById('url-bar').textContent = URLS[n] || URLS[0];
+  document.getElementById('step-info').textContent = `Step ${n+1} / ${N}`;
+  document.getElementById('progress-fill').style.width = ((n/(N-1))*100)+'%';
+  moveCursor(n);
+  // Slide-specific animations
+  runSlideAnim(n);
+}
+
+function runSlideAnim(n) {
+  if (n === 1) {  // Login typing
+    animType('login-user','admin',800);
+    setTimeout(()=>animType('login-pass','Admin@123',600),1200);
+    setTimeout(()=>{cursor.classList.add('click');setTimeout(()=>cursor.classList.remove('click'),300)},2400);
+  }
+  if (n === 3) {  // Org form
+    setTimeout(()=>{
+      const f = document.getElementById('org-form');
+      if(f) f.style.display='block';
+      setTimeout(()=>animType('org-name','Sunrise Builders Pvt Ltd',500),400);
+      setTimeout(()=>animType('org-short','SNRS',300),1500);
+      setTimeout(()=>animType('org-user','snrs_admin',400),2000);
+      setTimeout(()=>{
+        cursor.classList.add('click');setTimeout(()=>cursor.classList.remove('click'),300);
+        showToast('Organisation created! Demo data auto-loaded.');
+        const row = document.getElementById('new-org-row');
+        if(row){row.style.display='';document.getElementById('new-org-name-cell').textContent='Sunrise Builders Pvt Ltd';document.getElementById('new-org-short-cell').textContent='SNRS';}
+      },4500);
+    },1000);
+  }
+  if (n !== 3) {
+    const f = document.getElementById('org-form');
+    if(f) f.style.display='none';
+  }
+}
+
+function animType(id, text, speed) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = '';
+  el.classList.add('typing');
+  let i = 0;
+  const iv = setInterval(()=>{
+    if(i >= text.length){clearInterval(iv); el.classList.remove('typing'); return;}
+    el.value += text[i++];
+  }, speed);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+function nextSlide() {
+  cur = (cur + 1) % N;
+  showSlide(cur);
+  if (playing) schedNext();
+}
+function prevSlide() {
+  cur = (cur - 1 + N) % N;
+  showSlide(cur);
+  if (playing) schedNext();
+}
+function schedNext() {
+  clearTimeout(timer);
+  timer = setTimeout(nextSlide, DURATIONS[cur] || 5000);
+}
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('play-icon').className = playing ? 'fas fa-pause' : 'fas fa-play';
+  document.getElementById('play-label').textContent = playing ? 'Pause' : 'Play';
+  if (playing) schedNext(); else clearTimeout(timer);
+}
+function seekProgress(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  cur = Math.round(pct * (N-1));
+  showSlide(cur);
+  if (playing) schedNext();
+}
+
+// Init
+showSlide(0);
+schedNext();
+
+// Move cursor smoothly on mouse move too
+document.addEventListener('mousemove', e=>{
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+}, {passive:true});
+</script>
+</body>
+</html>

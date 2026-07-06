@@ -1,0 +1,92 @@
+{
+  "base": {
+    "id": 1,
+    "revision": 1,
+    "signoff_status": "superseded"
+  },
+  "compare": {
+    "id": 3,
+    "revision": 1,
+    "signoff_status": "draft"
+  },
+  "inputs_diff": {
+    "changed": {
+      "Mu_kNm": {
+        "from": 150,
+        "to": 180
+      },
+      "fck": {
+        "from": 25,
+        "to": 30
+      }
+    },
+    "added": {},
+    "removed": {}
+  },
+  "results_diff": {
+    "changed": {
+      "compression_steel.Asc_mm2": {
+        "from": 580.1,
+        "to": 700.6
+      },
+      "compression_steel.bars": {
+        "from": "3 \u2014 #16",
+        "to": "4 \u2014 #16"
+      },
+      "development_length.Ld_mm": {
+        "from": 645,
+        "to": 602
+      },
+      "input.Mu_kNm": {
+        "from": 150.0,
+        "to": 180.0
+      },
+      "input.fck_N_mm2": {
+        "from": 25.0,
+        "to": 30.0
+      },
+      "moment_capacity.Mu_lim_kNm": {
+        "from": 98.64,
+        "to": 118.37
+      },
+      "moment_capacity.applied_Mu_kNm": {
+        "from": 150.0,
+        "to": 180.0
+      },
+      "shear_design.stirrup_spacing_mm": {
+        "from": 250,
+        "to": 283
+      },
+      "shear_design.stirrups": {
+        "from": "2L \u2014 #8 @ 250 c/c",
+        "to": "2L \u2014 #8 @ 283 c/c"
+      },
+      "shear_design.\u03c4c_N_mm2": {
+        "from": 0.811,
+        "to": 0.867
+      },
+      "shear_design.\u03c4c_max_N_mm2": {
+        "from": 3.1,
+        "to": 3.5
+      },
+      "tension_steel.Ast_provided_mm2": {
+        "from": 1809.8999999999999,
+        "to": 2011.0
+      },
+      "tension_steel.Ast_required_mm2": {
+        "from": 1651.3,
+        "to": 1981.6
+      },
+      "tension_steel.bars": {
+        "from": "9 \u2014 #16",
+        "to": "10 \u2014 #16"
+      },
+      "tension_steel.pt_percent": {
+        "from": 1.952,
+        "to": 2.169
+      }
+    },
+    "added": {},
+    "removed": {}
+  }
+}
