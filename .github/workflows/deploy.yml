@@ -1,0 +1,22 @@
+name: Deploy to Lightsail
+
+# Auto-deploy: every push to main SSHes into the Lightsail server and updates it.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}      # also allow manual "Run workflow" from the Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script: |
+            export APP_DIR="${{ secrets.APP_DIR }}"
+            export SERVICE="${{ secrets.SERVICE_NAME }}"
+            bash "$APP_DIR/deploy/deploy.sh"
