@@ -9,8 +9,16 @@ BRANCH="${BRANCH:-main}"
 
 cd "$APP_DIR"
 
-echo "▶ Fetching latest ($BRANCH)…"
+echo "▶ Checking for updates ($BRANCH)…"
 git fetch --all --quiet
+LOCAL="$(git rev-parse HEAD)"
+REMOTE="$(git rev-parse "origin/${BRANCH}")"
+if [ "$LOCAL" = "$REMOTE" ]; then
+  echo "✓ Already up to date ($LOCAL) — nothing to deploy."
+  exit 0
+fi
+
+echo "▶ New commit found: $LOCAL -> $REMOTE"
 git reset --hard "origin/${BRANCH}"      # server mirrors GitHub exactly (no local edits kept)
 
 echo "▶ Installing backend dependencies…"
