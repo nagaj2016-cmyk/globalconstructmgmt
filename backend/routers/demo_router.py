@@ -49,13 +49,21 @@ def demo_status(user: models.User = Depends(require_demo_user), db: Session = De
 
 @router.post("/reset")
 def reset_demo(user: models.User = Depends(require_demo_user), db: Session = Depends(get_db)):
-    """Delete ALL demo rows for the demo company only."""
+    """Delete ALL demo rows for the demo company only.
+
+    Deletes in REVERSE foreign-key dependency order (children before parents) so
+    PostgreSQL's FK constraints are satisfied — SQLite doesn't enforce them, but
+    Postgres does, and arbitrary order raises a foreign-key violation."""
     cid = user.company_id
     removed = 0
-    for cls in _tenant_models():
-        # Explicit company filter + skip the auto-filter to avoid double criteria.
-        q = db.query(cls).filter(cls.company_id == cid).execution_options(skip_tenant=True)
-        removed += q.delete(synchronize_session=False)
+    tenant_by_table = {cls.__tablename__: cls for cls in _tenant_models()}
+    for table in reversed(models.Base.metadata.sorted_tables):
+        cls = tenant_by_table.get(table.name)
+        if cls is None:
+            continue
+        removed += (db.query(cls).filter(cls.company_id == cid)
+                    .execution_options(skip_tenant=True)
+                    .delete(synchronize_session=False))
     db.commit()
     return {"ok": True, "deleted_rows": removed}
 
